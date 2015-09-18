@@ -27,6 +27,8 @@ angular.module('myApp.view1', ['ngRoute'])
             start: function (callback) {
                 // callback = view update
 
+                if (!this.on) { return; }
+
                 // make sure we are in a good state
                 if (this.failTimer !== undefined) {
                     this.failTimer.clear();
@@ -265,6 +267,9 @@ angular.module('myApp.view1', ['ngRoute'])
             console.log(color + 'pressed');
             simon.btnInput(color, updateView);
         };
+        $scope.startBtn = function () {
+            simon.start(updateView);
+        };
 
         updateView();
 
@@ -284,7 +289,7 @@ angular.module('myApp.view1', ['ngRoute'])
         //simon.state = 'waiting';
 
         // test error
-        simon._error(updateView);
+        //simon._error(updateView);
 
     }])
 ;
