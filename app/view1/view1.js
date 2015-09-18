@@ -27,7 +27,29 @@ angular.module('myApp.view1', ['ngRoute'])
                 // callback(buttonFlash(btnNbr, time=ms), counterFlash(time=ms), playSound(sound, on=bool))
 
             },
-            btnInput: function (color) {
+            btnInput: function (color, callback) {
+                // callback = view update
+                if (this.state !== 'waiting') {
+                    return;
+                }
+                var btn;
+                if (color === 'green') {
+                    btn = 'btnGreen';
+                } else if (color === 'red') {
+                    btn = 'btnRed';
+                } else if (color === 'blue') {
+                    btn = 'btnBlue';
+                } else if (color === 'yellow') {
+                    btn = 'btnYellow';
+                }
+
+                // play sound
+                this.sndToPlay = this[btn + 'Snd'];
+
+                // process input
+                //todo
+
+                callback();
 
             },
             _generateSequence: function () {
@@ -148,22 +170,27 @@ angular.module('myApp.view1', ['ngRoute'])
             simon.toggleStrict();
             updateView();
         };
+        $scope.btnPress = function (color) {
+            console.log(color + 'pressed');
+            simon.btnInput(color, updateView);
+        };
 
         updateView();
 
 // test code
-/*
-        $scope.greenBtnOn = true;
-        $scope.redBtnOn = true;
-        $scope.blueBtnOn = true;
-        $scope.yellowBtnOn = true;*/
+        /*
+         $scope.greenBtnOn = true;
+         $scope.redBtnOn = true;
+         $scope.blueBtnOn = true;
+         $scope.yellowBtnOn = true;*/
 
         console.log('test simon._getBtn()' + simon._getBtn(1));
-
+        /*
         simon._generateSequence();
         console.log(simon.sequence);
         simon.seqCount = 19;
-        simon._playSequence(updateView);
+        simon._playSequence(updateView);*/
+        simon.state = 'waiting';
 
     }])
 ;
