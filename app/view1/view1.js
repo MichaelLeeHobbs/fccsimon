@@ -10,28 +10,48 @@ angular.module('myApp.view1', ['ngRoute'])
     }])
 
     .controller('View1Ctrl', ['$scope', '$timeout', function ($scope, $timeout) {
+        function stackTrace(msg) {
+            var err = new Error(msg);
+            throw err.stack;
+        }
+
         var simon = {
-            toggleOnOff: function () {
+            toggleOnOff: function (callback) {
+                if (callback === undefined) {
+                    stackTrace('callback undefined!');
+                }
+
                 this.on = !this.on;
                 this.counterOn = this.on;
                 if (!this.on) {
                     this.strict = false;
                     this.count = '- -';
+                    this._clearTimeOuts();
                 }
+                callback();
             },
-            toggleStrict: function () {
+            toggleStrict: function (callback) {
+                if (callback !== undefined){
+                    stackTrace('callback undefined!');
+                }
+
                 if (this.on) {
                     this.strict = !this.strict;
                 }
+                callback();
             },
             start: function (callback) {
+                if (callback === undefined){
+                    stackTrace('callback undefined!');
+                }
+
                 // callback = view update
 
                 if (!this.on) { return; }
 
                 // make sure we are in a good state
                 if (this.failTimer !== undefined) {
-                    this.failTimer.clear();
+                    $timeout.cancel(this.failTimer);
                     this.failTimer = undefined;
                 }
                 this.state = 'starting';
@@ -54,12 +74,16 @@ angular.module('myApp.view1', ['ngRoute'])
 
             },
             _run: function (callback) {
+                if (callback === undefined){
+                    stackTrace('callback undefined!');
+                }
+
                 // callback = view update
                 var parent = this;
 
                 // play the sequence up to sequence count + 1
                 // time is how long it will take to complete the playing the sequence
-                var time = this._playSequence();
+                var time = this._playSequence(callback);
 
                 // set state to waiting after sequence is done playing
                 this.timeOuts.push($timeout(function () {
@@ -79,8 +103,11 @@ angular.module('myApp.view1', ['ngRoute'])
                 //
             },
             _failed: function (callback) {
-                // player failed for some reason, we dont care why
+                if (callback === undefined){
+                    stackTrace('callback undefined!');
+                }
 
+                // player failed for some reason, we dont care why
                 // if strict that's it game over / restart
                 if (this.strict) {
                     this.failTimer = undefined;
@@ -93,10 +120,14 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
 
                 // if not strict then replay sequence
-                this._playSequence();
+                this._playSequence(callback);
 
             },
             btnInput: function (color, callback) {
+                if (callback === undefined){
+                    stackTrace('callback undefined!');
+                }
+
                 // callback = view update
                 if (this.state !== 'waiting') {
                     return;
@@ -128,7 +159,11 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.sequence.push(num);
                 }
             },
-            _playSequence: function (callBack) {
+            _playSequence: function (callback) {
+                if (callback === undefined){
+                    stackTrace('callback undefined!');
+                }
+
                 // callback is the viewUpdate function
                 var parent = this;
                 var delay = this.timeDelay;
@@ -147,14 +182,14 @@ angular.module('myApp.view1', ['ngRoute'])
                         this._getBtn(this.sequence[i]),
                         delay,
                         true,
-                        callBack
+                        callback
                     ));
                     // set timeout to turn button off
                     this.timeOuts.push(this._btnOnOff(
                         this._getBtn(this.sequence[i]),
                         delay + this.btnFlashTime,
                         false,
-                        callBack
+                        callback
                     ));
                     delay += this.timeDelay;
                 }
@@ -174,6 +209,10 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             },
             _btnOnOff: function (btn, time, isOn, callback) {
+                if (callback === undefined){
+                    stackTrace('callback undefined!');
+                }
+
                 // callback tells the view to update
                 // view handles the update
                 var parent = this;
@@ -190,6 +229,10 @@ angular.module('myApp.view1', ['ngRoute'])
                 }, time);
             },
             _error: function (callback) {
+                if (callback === undefined){
+                    stackTrace('callback undefined!');
+                }
+
                 // tell view ctrler to flash ! ! on counter
                 var parent = this;
                 var time = this.flashTime;
@@ -208,6 +251,19 @@ angular.module('myApp.view1', ['ngRoute'])
                     $timeout(flashFunc, time * i);
                 }
                 return time;
+            },
+            _clearTimeOuts: function() {
+                this.timeOuts.forEach(function(func){
+                    if (func !== undefined) {
+                        $timeout.cancel(func);
+                    }
+                });
+                this.timeOuts = [];
+
+                if (this.failTimer !== undefined) {
+                    $timeout.cancel(this.failTimer);
+                    this.failTimer = undefined;
+                }
             },
             state: 'none',
             on: false,
@@ -256,12 +312,10 @@ angular.module('myApp.view1', ['ngRoute'])
             //$scope.$apply();
         };
         $scope.switchClick = function () {
-            simon.toggleOnOff();
-            updateView();
+            simon.toggleOnOff(updateView);
         };
         $scope.strictClick = function () {
-            simon.toggleStrict();
-            updateView();
+            simon.toggleStrict(updateView);
         };
         $scope.btnPress = function (color) {
             console.log(color + 'pressed');
