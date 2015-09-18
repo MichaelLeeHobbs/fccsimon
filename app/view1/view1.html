@@ -31,10 +31,10 @@
             </div>
 
         </div>
-        <div class="btn btnGrn green"></div>
-        <div class="btn btnRed red"></div>
-        <div class="btn btnYlw yellow"></div>
-        <div class="btn btnBlu blue"></div>
+        <div ng-class="{lightgreen: greenBtnOn, green: !greenBtnOn}" class="btn btnGrn"></div>
+        <div ng-class="{lightred: redBtnOn, red: !redBtnOn}" class="btn btnRed red"></div>
+        <div ng-class="{lightyellow: yellowBtnOn, yellow: !yellowBtnOn}" class="btn btnYlw yellow"></div>
+        <div ng-class="{lightblue: blueBtnOn, blue: !blueBtnOn}" class="btn btnBlu blue"></div>
         <div class="vertDiv"></div>
         <div class="horzDiv"></div>
     </div>

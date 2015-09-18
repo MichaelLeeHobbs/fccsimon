@@ -23,7 +23,6 @@ body {
     width: 250px;
     height: 250px;
     z-index: 1;
-    transition: background-color .25s;
 }
 .btnBox {
     border: 5px solid #333;
@@ -72,19 +71,19 @@ body {
 }
 
 
-.greenOn {
+.lightgreen {
     background-color: #13ff7c;
 }
 
-.redOn {
+.lightred {
     background-color: #ff4c4c;
 }
 
-.yellowOn {
+.lightyellow {
     background-color: #fed93f;
 }
 
-.blueOn {
+.lightblue {
     background-color: #1c8cff;
 }
 .green {
