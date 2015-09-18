@@ -13,6 +13,7 @@ angular.module('myApp.view1', ['ngRoute'])
         var simon = {
             toggleOnOff: function () {
                 this.on = !this.on;
+                this.counterOn = this.on;
                 if (!this.on) {
                     this.strict = false;
                     this.count = '- -';
@@ -203,6 +204,7 @@ angular.module('myApp.view1', ['ngRoute'])
             },
             state: 'none',
             on: false,
+            counterOn: false,
             strict: false,
             count: '- -',
             sequence: [],
@@ -230,6 +232,7 @@ angular.module('myApp.view1', ['ngRoute'])
 
 
             $scope.onOff = simon.on;
+            $scope.counterOn = simon.counterOn;
             $scope.strictLed = simon.strict;
             $scope.count = simon.count;
             $scope.greenBtnOn = simon.btnGreen;
