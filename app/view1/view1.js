@@ -24,7 +24,73 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             },
             start: function (callback) {
-                // callback(buttonFlash(btnNbr, time=ms), counterFlash(time=ms), playSound(sound, on=bool))
+                // callback = view update
+
+                // make sure we are in a good state
+                if (this.failTimer !== undefined) {
+                    this.failTimer.clear();
+                    this.failTimer = undefined;
+                }
+                this.state = 'starting';
+                this.count = '- -';
+                this.seqCount = 0;
+                this.timeDelay = 1500;
+                this.btnGreen = false;
+                this.btnRed = false;
+                this.btnBlue = false;
+                this.btnYellow = false;
+                this.btnFlashTime = 1000;
+                this.sndToPlay = undefined;
+
+                // generate a sequence
+                this._generateSequence();
+
+                // run the game
+                this._run(callback);
+
+
+            },
+            _run: function (callback) {
+                // callback = view update
+                var parent = this;
+
+                // play the sequence up to sequence count + 1
+                // time is how long it will take to complete the playing the sequence
+                var time = this._playSequence();
+
+                // set state to waiting after sequence is done playing
+                this.timeOuts.push($timeout(function () {
+                    parent.state = 'waiting';
+                }, time));
+
+                // set timeout for failure i.e. player has this.inputTime to complete the sequence or this._failed is called
+                // store the promise is this.failtimer so we can clear it
+                this.failTimer = $timeout(function () {
+                    parent._failed(callback);
+                }, this.inputTime + time);
+
+
+                // if correct input wait for next input
+                // or if input count = sequence count then
+                // sequence count + 1 and loop
+                //
+            },
+            _failed: function (callback) {
+                // player failed for some reason, we dont care why
+
+                // if strict that's it game over / restart
+                if (this.strict) {
+                    this.failTimer = undefined;
+
+                    // restart
+                    $timeout(function () {
+                        parent.start(callback);
+                    }, this.autoRestartTime);
+                    return;
+                }
+
+                // if not strict then replay sequence
+                this._playSequence();
 
             },
             btnInput: function (color, callback) {
@@ -89,9 +155,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     ));
                     delay += this.timeDelay;
                 }
-                this.timeOuts.push($timeout(function () {
-                    parent.state = 'waiting';
-                }, delay));
+                return delay;
 
             },
             _getBtn: function (nbr) {
@@ -122,13 +186,28 @@ angular.module('myApp.view1', ['ngRoute'])
                     callback();
                 }, time);
             },
+            _error: function (callback) {
+                // tell view ctrler to flash ! ! on counter
+                var parent = this;
+                var time = 250;
+
+
+                $timeout(function (){
+                    parent.count = '! !';
+                    callback();
+                });
+
+                this.count = '! !';
+
+
+            },
             state: 'none',
             on: false,
             strict: false,
             count: '- -',
             sequence: [],
             seqCount: 0,
-            timeDelay: 1500,     // millisecond time delay between buttons
+            timeDelay: 1500,            // millisecond time delay between buttons
             timeOuts: [],
             btnGreen: false,
             btnGreenSnd: 'assets/sounds/simonSound1.mp3',
@@ -138,8 +217,11 @@ angular.module('myApp.view1', ['ngRoute'])
             btnBlueSnd: 'assets/sounds/simonSound3.mp3',
             btnYellow: false,
             btnYellowSnd: 'assets/sounds/simonSound4.mp3',
-            btnFlashTime: 1000,   // millisecond how long to leave a button on.
-            sndToPlay: undefined
+            btnFlashTime: 1000,         // millisecond how long to leave a button on.
+            sndToPlay: undefined,
+            inputTime: 8000,            // time player has to input the correct sequence
+            failTimer: undefined,
+            autoRestartTime: 2000       // millisecond how long to wait before restart
 
         };
 
@@ -186,10 +268,10 @@ angular.module('myApp.view1', ['ngRoute'])
 
         console.log('test simon._getBtn()' + simon._getBtn(1));
         /*
-        simon._generateSequence();
-        console.log(simon.sequence);
-        simon.seqCount = 19;
-        simon._playSequence(updateView);*/
+         simon._generateSequence();
+         console.log(simon.sequence);
+         simon.seqCount = 19;
+         simon._playSequence(updateView);*/
         simon.state = 'waiting';
 
     }])
