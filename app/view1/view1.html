@@ -8,7 +8,7 @@
 
             <div class="controlsWrapper">
                 <div class="countWrapper">
-                    <div class="counter"><p>{{count}}</p></div>
+                    <div class="counter"><p ng-class="{counterOn: onOff}">{{count}}</p></div>
                     <h3>COUNT</h3>
                 </div>
                 <div class="startWrapper">
@@ -16,7 +16,7 @@
                     <h3>START</h3>
                 </div>
                 <div class="strictWrapper">
-                    <div ng-class="{ledOn: strictLed}" class="led"></div>
+                    <div ng-class="{gameOn: strictLed}" class="led"></div>
                     <button ng-click="strictClick()" class="rndBtn"></button>
                     <h3>STRICT</h3>
                 </div>
