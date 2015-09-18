@@ -30,14 +30,14 @@ angular.module('myApp.view1', ['ngRoute'])
             btnInput: function (color) {
 
             },
-            generateSequence: function () {
+            _generateSequence: function () {
                 this.sequence = [];
                 for (var i = 0; i < 20; i++) {
                     var num = Math.floor(Math.random() * (5 - 1)) + 1;
                     this.sequence.push(num);
                 }
             },
-            playSequence: function (callBack) {
+            _playSequence: function (callBack) {
                 // callback is the viewUpdate function
                 var parent = this;
                 var delay = this.timeDelay;
@@ -91,6 +91,12 @@ angular.module('myApp.view1', ['ngRoute'])
                 return $timeout(function () {
                     console.log(btn + ': ' + isOn);
                     parent[btn] = isOn;
+                    if (isOn) {
+                        parent.sndToPlay = parent[btn + 'Snd'];
+                    } else {
+                        parent.sndToPlay = undefined;
+                    }
+
                     callback();
                 }, time);
             },
@@ -103,10 +109,16 @@ angular.module('myApp.view1', ['ngRoute'])
             timeDelay: 1500,     // millisecond time delay between buttons
             timeOuts: [],
             btnGreen: false,
+            btnGreenSnd: 'assets/sounds/simonSound1.mp3',
             btnRed: false,
+            btnRedSnd: 'assets/sounds/simonSound2.mp3',
             btnBlue: false,
+            btnBlueSnd: 'assets/sounds/simonSound3.mp3',
             btnYellow: false,
-            btnFlashTime: 1000   // millisecond how long to leave a button on.
+            btnYellowSnd: 'assets/sounds/simonSound4.mp3',
+            btnFlashTime: 1000,   // millisecond how long to leave a button on.
+            sndToPlay: undefined
+
         };
 
         var updateView = function () {
@@ -120,6 +132,12 @@ angular.module('myApp.view1', ['ngRoute'])
             $scope.redBtnOn = simon.btnRed;
             $scope.blueBtnOn = simon.btnBlue;
             $scope.yellowBtnOn = simon.btnYellow;
+
+            if (simon.sndToPlay !== undefined) {
+                var audio = new Audio(simon.sndToPlay);
+                audio.play();
+            }
+
             //$scope.$apply();
         };
         $scope.switchClick = function () {
@@ -142,10 +160,10 @@ angular.module('myApp.view1', ['ngRoute'])
 
         console.log('test simon._getBtn()' + simon._getBtn(1));
 
-        simon.generateSequence();
+        simon._generateSequence();
         console.log(simon.sequence);
         simon.seqCount = 19;
-        simon.playSequence(updateView);
+        simon._playSequence(updateView);
 
     }])
 ;
