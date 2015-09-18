@@ -23,10 +23,25 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.strict = !this.strict;
                 }
             },
+            start: function (callback) {
+                // callback(buttonFlash(color, time=ms), counterFlash(time=ms), playSound(sound, on=bool))
+
+            },
+            btnInput: function (color){
+
+            },
+            generateSequence: function(){
+                this.sequence = [];
+                for (var i = 0; i < 20; i++){
+                    var num = Math.floor(Math.random() * (5 - 1)) + 1;
+                    this.sequence.push(num);
+                }
+            },
             on: false,
             strict: false,
-            count: '- -'
-
+            count: '- -',
+            sequence: [],
+            seqCount: 0
         };
 
         var updateView = function () {
@@ -42,6 +57,10 @@ angular.module('myApp.view1', ['ngRoute'])
             simon.toggleStrict();
             updateView();
         };
+
+        // test code
+        simon.generateSequence();
+        console.log(simon.sequence);
 
 
         updateView();

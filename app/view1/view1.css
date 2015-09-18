@@ -23,6 +23,7 @@ body {
     width: 250px;
     height: 250px;
     z-index: 1;
+    transition: background-color .25s;
 }
 .btnBox {
     border: 5px solid #333;
@@ -71,6 +72,21 @@ body {
 }
 
 
+.greenOn {
+    background-color: #13ff7c;
+}
+
+.redOn {
+    background-color: #ff4c4c;
+}
+
+.yellowOn {
+    background-color: #fed93f;
+}
+
+.blueOn {
+    background-color: #1c8cff;
+}
 .green {
     background-color: #00a74a;
 }
@@ -196,6 +212,9 @@ body {
     height: .5em;
     margin: -5px auto;
 }
-.ledOn {
+.gameOn {
     background-color: #DC0D29;
+}
+.counterOn {
+    color: #DC0D29;
 }
