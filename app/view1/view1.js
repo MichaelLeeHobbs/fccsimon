@@ -190,17 +190,22 @@ angular.module('myApp.view1', ['ngRoute'])
             _error: function (callback) {
                 // tell view ctrler to flash ! ! on counter
                 var parent = this;
-                var time = 250;
-
-
-                $timeout(function (){
-                    parent.count = '! !';
-                    callback();
-                });
-
+                var time = this.flashTime;
                 this.count = '! !';
 
+                // tell view to update before we start flashing
+                callback();
 
+                var flashFunc = function () {
+                    parent.counterOn = !parent.counterOn;
+                    callback();
+                };
+
+                // tell view to flash ! !
+                for (var i = 1; i < 6; i++){
+                    $timeout(flashFunc, time * i);
+                }
+                return time;
             },
             state: 'none',
             on: false,
@@ -223,7 +228,8 @@ angular.module('myApp.view1', ['ngRoute'])
             sndToPlay: undefined,
             inputTime: 8000,            // time player has to input the correct sequence
             failTimer: undefined,
-            autoRestartTime: 2000       // millisecond how long to wait before restart
+            autoRestartTime: 2000,       // millisecond how long to wait before restart
+            flashTime: 300
 
         };
 
@@ -275,7 +281,10 @@ angular.module('myApp.view1', ['ngRoute'])
          console.log(simon.sequence);
          simon.seqCount = 19;
          simon._playSequence(updateView);*/
-        simon.state = 'waiting';
+        //simon.state = 'waiting';
+
+        // test error
+        simon._error(updateView);
 
     }])
 ;
