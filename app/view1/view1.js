@@ -11,18 +11,26 @@ angular.module('myApp.view1', ['ngRoute'])
 
     .controller('View1Ctrl', ['$scope', function ($scope) {
         var simon = {
-            on: false
+            on: false,
+            strict: false
 
         };
 
         var updateView = function () {
             $scope.onOff = simon.on;
+            $scope.strictLed = simon.strict;
 
         };
         $scope.count = '- -';
         $scope.switchClick = function () {
             simon.on = !simon.on;
             updateView();
+        };
+        $scope.strictClick = function () {
+            if (simon.on) {
+                simon.strict = !simon.strict;
+                updateView();
+            }
         };
 
     }]);

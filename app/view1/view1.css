@@ -196,3 +196,6 @@ body {
     height: .5em;
     margin: -5px auto;
 }
+.ledOn {
+    background-color: #DC0D29;
+}
