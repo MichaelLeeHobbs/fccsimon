@@ -96,12 +96,6 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.failTimer = $timeout(function () {
                     parent._failed(callback);
                 }, this.inputTime + time);
-
-
-                // if correct input wait for next input
-                // or if input count = sequence count then
-                // sequence count + 1 and loop
-                //
             },
             _failed: function (callback) {
                 if (callback === undefined){
@@ -134,23 +128,44 @@ angular.module('myApp.view1', ['ngRoute'])
                     return;
                 }
                 var btn;
+                var btnNum;
                 if (color === 'green') {
                     btn = 'btnGreen';
+                    btnNum = 1;
                 } else if (color === 'red') {
                     btn = 'btnRed';
+                    btnNum = 2;
                 } else if (color === 'blue') {
                     btn = 'btnBlue';
+                    btnNum = 3;
                 } else if (color === 'yellow') {
                     btn = 'btnYellow';
+                    btnNum = 4;
                 }
 
                 // play sound
                 this.sndToPlay = this[btn + 'Snd'];
+                callback();
 
                 // process input
-                //todo
 
-                callback();
+                // good input
+                if (this.sequence[this.seqNum] === btnNum) {
+                    this.seqNum++;
+
+                    if (this.seqNum > this.seqCount) {
+                        this.seqNum = 0;
+                        this.seqCount++;
+                        var time = this._playSequence(callback);
+                        // set state to waiting after sequence is done playing
+                        this.timeOuts.push($timeout(function () {
+                            parent.state = 'waiting';
+                        }, time));
+                    }
+                } else {
+                    // bad input
+                    this._error(callback);
+                }
 
             },
             _generateSequence: function () {
@@ -166,18 +181,11 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
 
                 // callback is the viewUpdate function
-                var parent = this;
                 var delay = this.timeDelay;
                 this.state = 'playing';
 
                 for (var i = 0; i <= this.seqCount; i++) {
                     // push timeouts onto an array so we can clear them all if needed
-                    //this.timeOuts.push($timeout(callBack(this.sequence[i], this.timeDelay), delay));
-
-                    // todo test
-                    console.log(this.sequence[i] + " = " + this._getBtn(this.sequence[i]));
-
-
                     // set timeout to turn button on
                     this.timeOuts.push(this._btnOnOff(
                         this._getBtn(this.sequence[i]),
@@ -310,8 +318,6 @@ angular.module('myApp.view1', ['ngRoute'])
                 var audio = new Audio(simon.sndToPlay);
                 audio.play();
             }
-
-            //$scope.$apply();
         };
         $scope.switchClick = function () {
             simon.toggleOnOff(updateView);
@@ -328,24 +334,6 @@ angular.module('myApp.view1', ['ngRoute'])
         };
 
         updateView();
-
-// test code
-        /*
-         $scope.greenBtnOn = true;
-         $scope.redBtnOn = true;
-         $scope.blueBtnOn = true;
-         $scope.yellowBtnOn = true;*/
-
-        console.log('test simon._getBtn()' + simon._getBtn(1));
-        /*
-         simon._generateSequence();
-         console.log(simon.sequence);
-         simon.seqCount = 19;
-         simon._playSequence(updateView);*/
-        //simon.state = 'waiting';
-
-        // test error
-        //simon._error(updateView);
 
     }])
 ;
