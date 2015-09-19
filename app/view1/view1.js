@@ -16,7 +16,7 @@ angular.module('myApp.view1', ['ngRoute'])
         }
 
         var simon = {
-            setCallback: function (callback){
+            setCallback: function (callback) {
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
                 }
@@ -45,26 +45,51 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             },
             toggleStrict: function () {
-                if (callback !== undefined) {
-                    stackTrace('callback undefined!');
-                }
-
                 if (this.on) {
                     this.strict = !this.strict;
                 }
             },
             _onUpdate: function (dt) {
-                console.log('tick: ' + dt);
+                this._processEvents(dt);
+
+                //console.log('tick: ' + dt);
+
 
                 // tell view to update
                 this.callback();
             },
+            _addEvent: function (delay, func, prams) {
+                var id = this.events.length;
+                this.events.push({id: id, delay: delay, func: func, prams: prams});
+                return id;
+            },
+            _removeEvent: function (id) {
+                this.events.some(function (element, index) {
+                    if (element.id === id) {
+                        this.events[index] = undefined;
+                        return true;
+                    }
+                }, this);
+            },
+            _processEvents: function (dt) {
+                var marker = 'marker';
+                this.events.push(marker);
 
-            start: function (callback) {
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
+                var shifted;
+                do {
+                    shifted = this.events.shift();
+                    if (shifted !== marker) {
+                        shifted.delay -= dt;
+                        if (shifted.delay <= 0){
+                            shifted.func(shifted.prams);
+                        } else {
+                            this.events.push(shifted);
+                        }
+                    }
+                } while (shifted !== marker);
+            },
 
+            start: function () {
                 // callback = view update
 
                 if (!this.on) {
@@ -93,9 +118,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this._generateSequence();
 
                 // run the game
-                this._run(callback);
-
-
+                this._run();
             },
             _setState: function (newState, timeDelay) {
                 var parent = this;
@@ -106,28 +129,24 @@ angular.module('myApp.view1', ['ngRoute'])
                     parent.state = newState;
                 }, timeDelay);
             },
-            _failed: function (callback) {
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
+
+            //todo rewrite
+            _failed: function () {
                 console.log('_failed');
                 // player failed for some reason, we dont care why
                 // if strict that's it game over / restart
                 if (this.strict) {
-                    this.failTimer = undefined;
 
-                    // restart
-                    $timeout(function () {
-                        parent.start(callback);
-                    }, this.autoRestartTime);
+                    // todo
+
                     return;
                 }
 
                 // if not strict then replay sequence
-                this._playSequence(callback, 'waiting');
+                this._playSequence('waiting');
                 this.seqNum = 0;
             },
-            btnInput: function (color, callback) {
+            btnInput: function (color) {
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
                 }
@@ -155,8 +174,8 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
 
                 // play sound and light button
-                this._btnOn(btn, 0, callback);
-                this._btnOff(btn, 100, callback);
+                this._btnOn(btn, 0);
+                this._btnOff(btn, 100);
 
                 // process input
                 // good input
@@ -167,30 +186,23 @@ angular.module('myApp.view1', ['ngRoute'])
                         this.seqNum = 0;
                         this.seqCount++;
                         $timeout.cancel(this.failTimer);
-                        var promise = this._playSequence(callback, 'waiting');
+                        var promise = this._playSequence('waiting');
                         var parent = this;
 
-                        this.failTimer = promise.then(function () {
-                            return $timeout(function () {
-                                parent._failed(callback);
-                            }, parent.inputTime);
-                        });
+
+                        // todo set fail timer
 
                     }
                 } else {
                     // bad input
-                    this._error(callback);
+                    this._error();
                 }
 
                 console.log('btnInput  done' + '  state: ' + this.state);
 
             },
-            _run: function (callback) {
+            _run: function () {
                 console.log('_run');
-                // callback = view update
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
                 this._setState('updating', 0);
 
                 var parent = this;
@@ -198,20 +210,12 @@ angular.module('myApp.view1', ['ngRoute'])
                 // play the sequence up to sequence count + 1
                 // time is how long it will take to complete the playing the sequence
                 // set state to waiting after sequence is done playing
-                var promise = this._playSequence(callback, 'waiting');
+                var promise = this._playSequence('waiting');
 
 
                 // set timeout for failure i.e. player has this.inputTime to complete the sequence or this._failed is called
                 // store the promise is this.failtimer so we can clear it
-                this.failTimer = promise.then(function () {
-                    return $timeout(function () {
-                        parent._failed(callback);
-                    }, parent.inputTime);
-                });
-                /*
-                 this.failTimer = $timeout(function () {
-                 parent._failed(callback);
-                 }, this.inputTime + time);*/
+                // todo set fail timer
             },
             _generateSequence: function () {
                 this.sequence = [];
@@ -220,12 +224,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.sequence.push(num);
                 }
             },
-            _playSequence: function (callback, nextState) {
-                // callback is the viewUpdate function
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
-
+            _playSequence: function (nextState) {
                 console.log('_playSequence');
 
                 var delay = this.timeDelay;
@@ -241,20 +240,17 @@ angular.module('myApp.view1', ['ngRoute'])
                     // turn buttons on off
                     this.promises.push(this._btnOn(
                         this._getBtn(this.sequence[i]),
-                        delay,
-                        callback
+                        delay
                     ));
                     // set timeout to turn button off
                     this.promises.push(this._btnOff(
                         this._getBtn(this.sequence[i]),
-                        delay + this.btnFlashTime,
-                        callback
+                        delay + this.btnFlashTime
                     ));
                     delay += this.timeDelay;
                 }
                 // set state to nextState after sequence is done playing
                 this.promises.push(parent._setState(nextState, delay));
-                console.log(this.promises);
                 return this.promises[this.promises.length - 1];
             },
             _getBtn: function (nbr) {
@@ -269,7 +265,7 @@ angular.module('myApp.view1', ['ngRoute'])
                         return 'btnYellow';
                 }
             },
-            _btnOn: function (btn, delay, callback) {
+            _btnOn: function (btn, delay) {
                 // callback tells the view to update
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
@@ -278,11 +274,10 @@ angular.module('myApp.view1', ['ngRoute'])
                 $timeout(function () {
                         parent[btn] = true;
                         parent.sndToPlay = parent[btn + 'Snd'];
-                        callback();
                     }, delay
                 );
             },
-            _btnOff: function (btn, delay, callback) {
+            _btnOff: function (btn, delay) {
                 // callback tells the view to update
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
@@ -291,15 +286,10 @@ angular.module('myApp.view1', ['ngRoute'])
                 $timeout(function () {
                         parent[btn] = false;
                         parent.sndToPlay = undefined;
-                        callback();
                     }, delay
                 );
             },
-            _error: function (callback) {
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
-
+            _error: function () {
                 // tell view ctrler to flash ! ! on counter
                 var parent = this;
                 var time = this.flashTime;
@@ -310,7 +300,6 @@ angular.module('myApp.view1', ['ngRoute'])
 
                 var flashFunc = function () {
                     parent.counterOn = !parent.counterOn;
-                    callback();
                 };
 
                 // tell view to flash ! !
@@ -332,6 +321,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.failTimer = undefined;
                 }
             },
+            events: [],
             state: 'off',
             on: false,
             counterOn: false,
