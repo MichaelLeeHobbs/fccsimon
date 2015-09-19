@@ -116,14 +116,8 @@ angular.module('myApp.view1', ['ngRoute'])
                 // run the game
                 this._run();
             },
-            _setState: function (newState, timeDelay) {
-                var parent = this;
-                if (!timeDelay) {
-                    timeDelay = 0;
-                }
-                return $timeout(function () {
-                    parent.state = newState;
-                }, timeDelay);
+            _setState: function (newState) {
+                parent.state = newState;
             },
 
             //todo rewrite
@@ -192,7 +186,7 @@ angular.module('myApp.view1', ['ngRoute'])
             },
             _run: function () {
                 console.log('_run');
-                this._setState('updating', 0);
+                this._addEvent(0, this, this._setState, 'updating');
 
                 var parent = this;
 
@@ -219,28 +213,20 @@ angular.module('myApp.view1', ['ngRoute'])
                 var delay = this.timeDelay;
                 var parent = this;
 
-                this.promises.push(this._setState('playing', 0));
+                this._addEvent(0, this, this._setState, 'playing');
 
                 for (var i = 0; i < this.seqCount + 1; i++) {
-                    // push timeouts onto an array so we can clear them all if needed
-                    // set timeout to turn button on
 
-                    // todo remove functions from loop
-                    // turn buttons on off
-                    this.promises.push(this._btnOn(
-                        this._getBtn(this.sequence[i]),
-                        delay
-                    ));
-                    // set timeout to turn button off
-                    this.promises.push(this._btnOff(
-                        this._getBtn(this.sequence[i]),
-                        delay + this.btnFlashTime
-                    ));
+                    // button on
+                    this._addEvent(delay, this, this._btnOn, this._getBtn(this.sequence[i]));
+                    // button off
+                    this._addEvent(delay + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
+
                     delay += this.timeDelay;
                 }
                 // set state to nextState after sequence is done playing
-                this.promises.push(parent._setState(nextState, delay));
-                return this.promises[this.promises.length - 1];
+                this._addEvent(delay, this, this._setState, nextState);
+                return delay;
             },
             _getBtn: function (nbr) {
                 switch (nbr) {
@@ -259,7 +245,6 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.sndToPlay = this[btn + 'Snd'];
             },
             _btnOff: function (btn) {
-                console.log(btn + ' off');
                 this[btn] = false;
                 this.sndToPlay = undefined;
             },
@@ -355,6 +340,11 @@ angular.module('myApp.view1', ['ngRoute'])
         };
         simon.setCallback(updateView);
         updateView();
+
+        simon.toggleOnOff();
+        simon._generateSequence();
+        simon.seqCount = 19;
+        simon._playSequence('testing');
 
     }])
 ;
