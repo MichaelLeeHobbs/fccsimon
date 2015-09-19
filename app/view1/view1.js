@@ -78,6 +78,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 if (callback === undefined){
                     stackTrace('callback undefined!');
                 }
+                this.state = 'updating';
 
                 // callback = view update
                 var parent = this;
@@ -115,13 +116,16 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
 
                 // if not strict then replay sequence
-                this._playSequence(callback);
+                this._playSequence(callback, waiting);
+                this.seqNum = 0;
 
             },
             btnInput: function (color, callback) {
                 if (callback === undefined){
                     stackTrace('callback undefined!');
                 }
+
+                console.log('btnInput  color: ' + color + '  state: ' + this.state);
 
                 // callback = view update
                 if (this.state !== 'waiting') {
@@ -143,9 +147,10 @@ angular.module('myApp.view1', ['ngRoute'])
                     btnNum = 4;
                 }
 
-                // play sound
+                // play sound and light button
+                // _btnOnOff: function (btn, time, isOn, callback) {
                 this.sndToPlay = this[btn + 'Snd'];
-                callback();
+                this._btnOnOff(btn, 100, true, callback);
 
                 // process input
 
@@ -157,16 +162,15 @@ angular.module('myApp.view1', ['ngRoute'])
                     if (this.seqNum > this.seqCount) {
                         this.seqNum = 0;
                         this.seqCount++;
-                        var time = this._playSequence(callback);
-                        // set state to waiting after sequence is done playing
-                        this.timeOuts.push($timeout(function () {
-                            parent.state = 'waiting';
-                        }, time));
+                        var time = this._playSequence(callback, 'waiting');
+
                     }
                 } else {
                     // bad input
                     this._error(callback);
                 }
+
+                console.log('btnInput  done' + '  state: ' + this.state);
 
             },
             _generateSequence: function () {
@@ -176,14 +180,21 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.sequence.push(num);
                 }
             },
-            _playSequence: function (callback) {
+            _playSequence: function (callback, nextState) {
                 if (callback === undefined){
                     stackTrace('callback undefined!');
                 }
 
                 // callback is the viewUpdate function
                 var delay = this.timeDelay;
+                var oldState = this.state;
                 this.state = 'playing';
+                var parent = this;
+                var setState = function () {
+                    parent.state = nextState;
+                    console.log('last timeout from _playSequence');
+                    console.log('state set to: ' + oldState);
+                };
 
                 for (var i = 0; i <= this.seqCount; i++) {
                     // push timeouts onto an array so we can clear them all if needed
@@ -202,6 +213,9 @@ angular.module('myApp.view1', ['ngRoute'])
                         callback
                     ));
                     delay += this.timeDelay;
+
+                    // set state to waiting after sequence is done playing
+                    this.timeOuts.push($timeout(setState, delay));
                 }
                 return delay;
 
@@ -227,7 +241,6 @@ angular.module('myApp.view1', ['ngRoute'])
                 // view handles the update
                 var parent = this;
                 return $timeout(function () {
-                    console.log(btn + ': ' + isOn);
                     parent[btn] = isOn;
                     if (isOn) {
                         parent.sndToPlay = parent[btn + 'Snd'];
@@ -327,7 +340,6 @@ angular.module('myApp.view1', ['ngRoute'])
             simon.toggleStrict(updateView);
         };
         $scope.btnPress = function (color) {
-            console.log(color + 'pressed');
             simon.btnInput(color, updateView);
         };
         $scope.startBtn = function () {
