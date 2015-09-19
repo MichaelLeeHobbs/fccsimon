@@ -16,11 +16,13 @@ angular.module('myApp.view1', ['ngRoute'])
         }
 
         var simon = {
-            toggleOnOff: function (callback) {
+            setCallback: function (callback){
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
                 }
-
+                this.callback = callback;
+            },
+            toggleOnOff: function () {
                 this.on = !this.on;
                 this.counterOn = this.on;
                 if (!this.on) {
@@ -29,6 +31,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     this._clearTimeOuts();
                     $interval.cancel(this.heartBeat);
                     this.heartBeat = undefined;
+                    this.callback();
                 } else {
                     // heart beat
                     var parent = this;
@@ -40,9 +43,8 @@ angular.module('myApp.view1', ['ngRoute'])
                     };
                     this.heartBeat = $interval(updateTick, 33, 0, true);
                 }
-                callback();
             },
-            toggleStrict: function (callback) {
+            toggleStrict: function () {
                 if (callback !== undefined) {
                     stackTrace('callback undefined!');
                 }
@@ -50,10 +52,12 @@ angular.module('myApp.view1', ['ngRoute'])
                 if (this.on) {
                     this.strict = !this.strict;
                 }
-                callback();
             },
             _onUpdate: function (dt) {
                 console.log('tick: ' + dt);
+
+                // tell view to update
+                this.callback();
             },
 
             start: function (callback) {
@@ -382,9 +386,8 @@ angular.module('myApp.view1', ['ngRoute'])
         $scope.startBtn = function () {
             simon.start(updateView);
         };
-
+        simon.setCallback(updateView);
         updateView();
-
 
     }])
 ;
