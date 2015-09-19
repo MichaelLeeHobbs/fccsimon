@@ -56,7 +56,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     $timeout.cancel(this.failTimer);
                     this.failTimer = undefined;
                 }
-                this.state = 'starting';
+                this._setState('starting', 0);
                 this.count = '- -';
                 this.seqCount = 0;
                 this.seqNum = 0;
@@ -89,7 +89,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
                 }
-                this.state = 'updating';
+                this._setState('updating', 0);
 
                 // callback = view update
                 var parent = this;
@@ -196,14 +196,9 @@ angular.module('myApp.view1', ['ngRoute'])
 
                 // callback is the viewUpdate function
                 var delay = this.timeDelay;
-                var oldState = this.state;
-                this.state = 'playing';
+
+                this._setState('playing', 0);
                 var parent = this;
-                var setState = function () {
-                    parent.state = nextState;
-                    console.log('last timeout from _playSequence');
-                    console.log('state set to: ' + oldState);
-                };
 
                 for (var i = 0; i <= this.seqCount; i++) {
                     // push timeouts onto an array so we can clear them all if needed
@@ -222,10 +217,10 @@ angular.module('myApp.view1', ['ngRoute'])
                         callback
                     ));
                     delay += this.timeDelay;
-
-                    // set state to waiting after sequence is done playing
-                    this.timeOuts.push($timeout(setState, delay));
                 }
+                // set state to nextState after sequence is done playing
+                this.timeOuts.push(this._setState(nextState, delay));
+
                 return delay;
 
             },
@@ -358,17 +353,18 @@ angular.module('myApp.view1', ['ngRoute'])
         updateView();
 
         // testing
-        console.log(simon._setState('waiting', 100));
-        simon._setState('waiting', 100).then(
+        var test = simon._setState('waiting', 1000);
+        test.then(
             function() {
                 console.log(simon.state);
-                simon._setState('something', 100).then(
+                simon._setState('something', 1000).then(
                     function() {
                         console.log(simon.state);
                     }
                 );
             }
         );
+        $timeout.cancel(test);
 
     }])
 ;
