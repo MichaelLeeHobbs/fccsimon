@@ -151,6 +151,7 @@ angular.module('myApp.view1', ['ngRoute'])
 
                 // good input
                 if (this.sequence[this.seqNum] === btnNum) {
+                    var parent = this;
                     this.seqNum++;
 
                     if (this.seqNum > this.seqCount) {
