@@ -74,6 +74,16 @@ angular.module('myApp.view1', ['ngRoute'])
 
 
             },
+            _setState: function(newState, timeDelay){
+                var parent = this;
+                if (timeDelay){
+                    this.timeOuts.push($timeout(function () {
+                        parent.state = newState;
+                    }, timeDelay));
+                } else {
+                    parent.state = newState;
+                }
+            },
             _run: function (callback) {
                 if (callback === undefined){
                     stackTrace('callback undefined!');
@@ -88,9 +98,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 var time = this._playSequence(callback);
 
                 // set state to waiting after sequence is done playing
-                this.timeOuts.push($timeout(function () {
-                    parent.state = 'waiting';
-                }, time));
+                this._setState('waiting', time);
 
                 // set timeout for failure i.e. player has this.inputTime to complete the sequence or this._failed is called
                 // store the promise is this.failtimer so we can clear it
