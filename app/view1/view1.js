@@ -52,15 +52,13 @@ angular.module('myApp.view1', ['ngRoute'])
             _onUpdate: function (dt) {
                 this._processEvents(dt);
 
-                //console.log('tick: ' + dt);
-
-
                 // tell view to update
                 this.callback();
+                //$scope.$apply();
             },
-            _addEvent: function (delay, func, prams) {
+            _addEvent: function (delay, scope, func, prams) {
                 var id = this.events.length;
-                this.events.push({id: id, delay: delay, func: func, prams: prams});
+                this.events.push({id: id, scope: scope, delay: delay, func: func, prams: prams});
                 return id;
             },
             _removeEvent: function (id) {
@@ -80,8 +78,8 @@ angular.module('myApp.view1', ['ngRoute'])
                     shifted = this.events.shift();
                     if (shifted !== marker) {
                         shifted.delay -= dt;
-                        if (shifted.delay <= 0){
-                            shifted.func(shifted.prams);
+                        if (shifted.delay <= 0) {
+                            shifted.func.bind(shifted.scope)(shifted.prams);
                         } else {
                             this.events.push(shifted);
                         }
@@ -90,8 +88,6 @@ angular.module('myApp.view1', ['ngRoute'])
             },
 
             start: function () {
-                // callback = view update
-
                 if (!this.on) {
                     return;
                 }
@@ -147,13 +143,6 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.seqNum = 0;
             },
             btnInput: function (color) {
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
-
-                console.log('btnInput  color: ' + color + '  state: ' + this.state);
-
-                // callback = view update
                 if (this.state !== 'waiting') {
                     return;
                 }
@@ -174,8 +163,8 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
 
                 // play sound and light button
-                this._btnOn(btn, 0);
-                this._btnOff(btn, 100);
+                this._addEvent(0, this, this._btnOn, btn);
+                this._addEvent(this.btnFlashTime, this, this._btnOff, btn);
 
                 // process input
                 // good input
@@ -265,29 +254,14 @@ angular.module('myApp.view1', ['ngRoute'])
                         return 'btnYellow';
                 }
             },
-            _btnOn: function (btn, delay) {
-                // callback tells the view to update
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
-                var parent = this;
-                $timeout(function () {
-                        parent[btn] = true;
-                        parent.sndToPlay = parent[btn + 'Snd'];
-                    }, delay
-                );
+            _btnOn: function (btn) {
+                this[btn] = true;
+                this.sndToPlay = this[btn + 'Snd'];
             },
-            _btnOff: function (btn, delay) {
-                // callback tells the view to update
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
-                var parent = this;
-                $timeout(function () {
-                        parent[btn] = false;
-                        parent.sndToPlay = undefined;
-                    }, delay
-                );
+            _btnOff: function (btn) {
+                console.log(btn + ' off');
+                this[btn] = false;
+                this.sndToPlay = undefined;
             },
             _error: function () {
                 // tell view ctrler to flash ! ! on counter
@@ -296,7 +270,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.count = '! !';
 
                 // tell view to update before we start flashing
-                callback();
+                // this.callback();
 
                 var flashFunc = function () {
                     parent.counterOn = !parent.counterOn;
@@ -362,7 +336,10 @@ angular.module('myApp.view1', ['ngRoute'])
             if (simon.sndToPlay !== undefined) {
                 var audio = new Audio(simon.sndToPlay);
                 audio.play();
+                // todo fix this
+                simon.sndToPlay = undefined;
             }
+            //$scope.$apply();
         };
         $scope.switchClick = function () {
             simon.toggleOnOff(updateView);
