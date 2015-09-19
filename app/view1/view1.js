@@ -211,17 +211,14 @@ angular.module('myApp.view1', ['ngRoute'])
                 console.log('_playSequence');
 
                 var delay = this.timeDelay;
-                var parent = this;
-
+                // set state to playing to prevent user actions other than on/off
                 this._addEvent(0, this, this._setState, 'playing');
 
                 for (var i = 0; i < this.seqCount + 1; i++) {
-
                     // button on
                     this._addEvent(delay, this, this._btnOn, this._getBtn(this.sequence[i]));
                     // button off
                     this._addEvent(delay + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
-
                     delay += this.timeDelay;
                 }
                 // set state to nextState after sequence is done playing
