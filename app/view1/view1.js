@@ -57,6 +57,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.state = 'starting';
                 this.count = '- -';
                 this.seqCount = 0;
+                this.seqNum = 0;
                 this.timeDelay = 1500;
                 this.btnGreen = false;
                 this.btnRed = false;
@@ -169,7 +170,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 var delay = this.timeDelay;
                 this.state = 'playing';
 
-                for (var i = 0; i < this.seqCount + 1; i++) {
+                for (var i = 0; i <= this.seqCount; i++) {
                     // push timeouts onto an array so we can clear them all if needed
                     //this.timeOuts.push($timeout(callBack(this.sequence[i], this.timeDelay), delay));
 
@@ -272,6 +273,7 @@ angular.module('myApp.view1', ['ngRoute'])
             count: '- -',
             sequence: [],
             seqCount: 0,
+            seqNum: 0,
             timeDelay: 1500,            // millisecond time delay between buttons
             timeOuts: [],
             btnGreen: false,
