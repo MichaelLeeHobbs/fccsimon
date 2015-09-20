@@ -17,47 +17,70 @@ angular.module('myApp.view1', ['ngRoute'])
 
         var simon = {
             states: {
-                on: function (){},
-                off: function (){},
-                run: function (){},
-                waiting: function (){},
-                playing: function (){}
+                on: function () {
+                    // next state
+                    this._addEvent(0, this, this._setState, this.states.ready);
+                },
+                off: function () {
+                    this.strict = false;
+                    this.count = '- -';
+                    this._clearTimeOuts();
+
+                    // todo we need to add some clean up code - example buttons will stay lit if on/off call while they are lit
+                    // todo might need to move the on/off state change to onUpdate and have it
+                    // todo remove heartbeat there
+
+                    // set state to undefined - this is our initial state
+                    this._addEvent(0, this, this._setState, undefined);
+                    // stop heartbeat 100ms latter - this gives update time to process any clean up events
+                    this._addEvent(100, this, this._stopHeartBeat, undefined);
+                },
+                ready: function () {
+
+                },
+                run: function () {
+                },
+                waiting: function () {
+                },
+                playing: function () {
+                }
             },
-            setCallback: function (callback) {
+            _startHeartBeat: function () {
+                // heart beat
+                var parent = this;
+                var lastTick = Date.now();
+                var updateTick = function () {
+                    var tick = Date.now();
+                    parent._onUpdate(tick - lastTick);
+                    lastTick = tick;
+                };
+                this.heartBeat = $interval(updateTick, 33, 0, true);
+            },
+            _stopHeartBeat: function () {
+                $interval.cancel(this.heartBeat);
+                this.heartBeat = undefined;
+            },
+            _setCallback: function (callback) {
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
                 }
                 this.callback = callback;
             },
-            toggleOnOff: function () {
-                this.on = !this.on;
-                this.counterOn = this.on;
-                if (!this.on) {
-                    this.strict = false;
-                    this.count = '- -';
-                    this._clearTimeOuts();
-                    $interval.cancel(this.heartBeat);
-                    this.heartBeat = undefined;
-                    // todo we need to add some clean up code - example buttons will stay lit if on/off call while they are lit
-                    // todo might need to move the on/off state change to onUpdate and have it
-                    // todo remove heartbeat there
-                    this.callback();
-                } else {
-                    // heart beat
-                    var parent = this;
-                    var lastTick = Date.now();
-                    var updateTick = function () {
-                        var tick = Date.now();
-                        parent._onUpdate(tick - lastTick);
-                        lastTick = tick;
-                    };
-                    this.heartBeat = $interval(updateTick, 33, 0, true);
+            on: function (callback) {
+                if (callback === undefined) {
+                    stackTrace('callback cannot be undefined!');
                 }
+                this._setCallback(callback);
+                this._startHeartBeat();
+                var parent = this;
+                this._addEvent(0, this, parent.states.on);
+            },
+            off: function () {
+                var parent = this;
+                this._addEvent(0, this, parent.states.off);
             },
             toggleStrict: function () {
-                if (this.on) {
-                    this.strict = !this.strict;
-                }
+                this.strict = !this.strict;
             },
             _onUpdate: function (dt) {
                 this._processEvents(dt);
@@ -127,7 +150,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this._run();
             },
             _setState: function (newState) {
-                parent.state = newState;
+                this.state = newState;
             },
 
             //todo rewrite
@@ -292,9 +315,11 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.sndToPlay = undefined;
                 return result;
             },
+            getOnOffState: function () {
+                return this.state !== this.states.off && this.state !== undefined;
+            },
             events: [],
-            state: 'off',
-            on: false,
+            state: undefined,
             counterOn: false,
             strict: false,
             count: '- -',
@@ -320,8 +345,9 @@ angular.module('myApp.view1', ['ngRoute'])
             heartBeat: undefined
         };
 
+        var onOffSwitch = false;
         var updateView = function () {
-            $scope.onOff = simon.on;
+            $scope.onOff = simon.getOnOffState();
             $scope.counterOn = simon.counterOn;
             $scope.strictLed = simon.strict;
             $scope.count = simon.count;
@@ -338,7 +364,12 @@ angular.module('myApp.view1', ['ngRoute'])
             //$scope.$apply();
         };
         $scope.switchClick = function () {
-            simon.toggleOnOff(updateView);
+            onOffSwitch = !onOffSwitch;
+            if (onOffSwitch) {
+                simon.on(updateView);
+            } else {
+                simon.off();
+            }
         };
         $scope.strictClick = function () {
             simon.toggleStrict(updateView);
@@ -348,16 +379,16 @@ angular.module('myApp.view1', ['ngRoute'])
         };
         $scope.startBtn = function () {
             simon.start(updateView);
+            updateView();
         };
-        simon.setCallback(updateView);
         updateView();
 
         /*
-        simon.toggleOnOff();
-        simon._generateSequence();
-        simon.seqCount = 19;
-        simon._playSequence('testing');
-        */
+         simon.toggleOnOff();
+         simon._generateSequence();
+         simon.seqCount = 19;
+         simon._playSequence('testing');
+         */
 
     }])
 ;
