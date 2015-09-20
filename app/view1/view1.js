@@ -69,7 +69,8 @@ angular.module('myApp.view1', ['ngRoute'])
             }, /* end of states */
             animation:       {
                 play:  function (animation, nextState) {
-
+                    var animationTime = animation();
+                    this._addEvent(animationTime, this, this._setState, nextState);
                 },
                 error: function () {
                     // tell view ctrler to flash ! ! on counter
@@ -366,7 +367,8 @@ angular.module('myApp.view1', ['ngRoute'])
             sndToPlay:       undefined,
             failTimer:       undefined,
             heartBeat:       undefined
-        }; /* end of simon */
+        };
+        /* end of simon */
 
         var onOffSwitch    = false;
         var updateView     = function () {
