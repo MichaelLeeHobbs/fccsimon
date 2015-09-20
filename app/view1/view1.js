@@ -277,6 +277,11 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.failTimer = undefined;
                 }
             },
+            getSoundToPlay: function () {
+                var result = this.sndToPlay;
+                this.sndToPlay = undefined;
+                return result;
+            },
             events: [],
             state: 'off',
             on: false,
@@ -295,8 +300,8 @@ angular.module('myApp.view1', ['ngRoute'])
             btnBlueSnd: 'assets/sounds/simonSound3.mp3',
             btnYellow: false,
             btnYellowSnd: 'assets/sounds/simonSound4.mp3',
-            timeDelay: 1500,            // millisecond time delay between buttons
-            btnFlashTime: 1000,         // millisecond how long to leave a button on.
+            timeDelay: 1250,            // millisecond time delay between buttons
+            btnFlashTime: 750,         // millisecond how long to leave a button on.
             inputTime: 8000,            // time player has to input the correct sequence
             autoRestartTime: 2000,       // millisecond how long to wait before restart
             flashTime: 300,
@@ -315,11 +320,10 @@ angular.module('myApp.view1', ['ngRoute'])
             $scope.blueBtnOn = simon.btnBlue;
             $scope.yellowBtnOn = simon.btnYellow;
 
-            if (simon.sndToPlay !== undefined) {
-                var audio = new Audio(simon.sndToPlay);
+            var sndToPlay = simon.getSoundToPlay();
+            if (sndToPlay !== undefined) {
+                var audio = new Audio(sndToPlay);
                 audio.play();
-                // todo fix this
-                simon.sndToPlay = undefined;
             }
             //$scope.$apply();
         };
@@ -338,10 +342,12 @@ angular.module('myApp.view1', ['ngRoute'])
         simon.setCallback(updateView);
         updateView();
 
+        /*
         simon.toggleOnOff();
         simon._generateSequence();
         simon.seqCount = 19;
         simon._playSequence('testing');
+        */
 
     }])
 ;
