@@ -119,13 +119,9 @@ angular.module('myApp.view1', ['ngRoute'])
                     }
                 } while (shifted !== marker);
             },
-
-            start: function () {
-                if (!this.on) {
-                    return;
-                }
-
-                // make sure we are in a good state
+            _cleanup: function () {
+                // kill any lingering failTimers
+                // todo
                 if (this.failTimer !== undefined) {
                     $timeout.cancel(this.failTimer);
                     this.failTimer = undefined;
@@ -142,12 +138,24 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.btnYellow = false;
                 this.btnFlashTime = 1000;
                 this.sndToPlay = undefined;
+            },
+
+            start: function () {
+                if (!this.getOnOffState()) {
+                    return;
+                }
+                // make sure we are in a good state
+                this._cleanup();
 
                 // generate a sequence
                 this._generateSequence();
 
-                // run the game
-                this._run();
+                // play sequence
+                var delay = this._playSequence();
+
+                // set state to run
+                var parent = this;
+                this._addEvent(delay, this, this._setState, parent.states.run);
             },
             _setState: function (newState) {
                 this.state = newState;
@@ -240,12 +248,13 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.sequence.push(num);
                 }
             },
-            _playSequence: function (nextState) {
+            _playSequence: function () {
                 console.log('_playSequence');
 
                 var delay = this.timeDelay;
                 // set state to playing to prevent user actions other than on/off
-                this._addEvent(0, this, this._setState, 'playing');
+                var parent = this;
+                this._addEvent(0, this, this._setState, parent.states.playing);
 
                 for (var i = 0; i < this.seqCount + 1; i++) {
                     // button on
@@ -254,8 +263,6 @@ angular.module('myApp.view1', ['ngRoute'])
                     this._addEvent(delay + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
                     delay += this.timeDelay;
                 }
-                // set state to nextState after sequence is done playing
-                this._addEvent(delay, this, this._setState, nextState);
                 return delay;
             },
             _getBtn: function (nbr) {
@@ -372,14 +379,13 @@ angular.module('myApp.view1', ['ngRoute'])
             }
         };
         $scope.strictClick = function () {
-            simon.toggleStrict(updateView);
+            simon.toggleStrict();
         };
         $scope.btnPress = function (color) {
-            simon.btnInput(color, updateView);
+            simon.btnInput(color);
         };
         $scope.startBtn = function () {
-            simon.start(updateView);
-            updateView();
+            simon.start();
         };
         updateView();
 
