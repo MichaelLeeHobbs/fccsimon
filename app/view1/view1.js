@@ -18,12 +18,14 @@ angular.module('myApp.view1', ['ngRoute'])
         var simon = {
             states:          {
                 on:        function () {
+                    /* state: on */
                     this.view.gameOn    = true;
                     this.view.counterOn = true;
                     // next state
                     this._addEvent(0, this, this._setState, this.states.ready);
                 },
                 off:       function () {
+                    /* state: off */
                     this.view.gameOn    = false;
                     this.view.strict    = false;
                     this.view.counter   = '- -';
@@ -40,24 +42,30 @@ angular.module('myApp.view1', ['ngRoute'])
                     this._addEvent(100, this, this._stopHeartBeat, undefined);
                 },
                 ready:     function () {
-
+                    /* state: ready */
                 },
                 run:       function () {
+                    /* state: run */
                 },
                 waiting:   function () {
+                    /* state: waiting */
                 },
                 animating: function () {
+                    /* state: animating */
                     // empty marker state
                 },
                 playing:   function () {
+                    /* state: playing */
                 },
                 start:     function () {
+                    /* state: start */
 
                 },
                 restart:   function () {
-
+                    /* state: restart */
                 },
                 failed:    function () {
+                    /* state: failed */
                     console.log('failed');
                     // player failed for some reason, we don't care why
 
@@ -159,7 +167,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 var shifted;
                 do {
                     shifted = this.events.shift();
-                    if (shifted !== marker) {
+                    if (shifted !== marker && shifted !== undefined) {
                         shifted.delay -= dt;
                         if (shifted.delay <= 0) {
                             shifted.func.bind(shifted.scope)(shifted.prams);
@@ -211,13 +219,13 @@ angular.module('myApp.view1', ['ngRoute'])
 
                 // add event to time out if they take too long to input buttons
                 // keep event id so we can cancel it
-                this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
+                this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
             },
             _setState:         function (newState) {
                 this.state = newState;
             },
             btnInput:          function (color) {
-                if (this.state !== 'waiting') {
+                if (this.state !== this.states.run) {
                     return;
                 }
                 var btn;
@@ -242,27 +250,32 @@ angular.module('myApp.view1', ['ngRoute'])
 
                 // process input
                 // good input
+                var parent = this;
                 if (this.sequence[this.seqNum] === btnNum) {
                     this.seqNum++;
 
                     if (this.seqNum > this.seqCount) {
+                        console.log('this.seqNum > this.seqCount');
                         this.seqNum = 0;
                         this.seqCount++;
-                        $timeout.cancel(this.failTimer);
-                        var promise = this._playSequence('waiting');
-                        var parent  = this;
 
+                        // cancel fail timer
+                        this._removeEvent(this.failTimerID);
 
-                        // todo set fail timer
+                        // play sequence
+                        var delay = this._playSequence();
 
+                        // set state to run
+                        this._addEvent(delay, this, this._setState, parent.states.run);
+
+                        // add event to time out if they take too long to input buttons
+                        // keep event id so we can cancel it
+                        this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
                     }
                 } else {
                     // bad input - set state to failed
                     this._addEvent(0, this, this._setState, parent.states.failed);
                 }
-
-                console.log('btnInput  done' + '  state: ' + this.state);
-
             },
             _run:              function () {
                 console.log('_run');
@@ -372,7 +385,7 @@ angular.module('myApp.view1', ['ngRoute'])
             inputTimeOut:    8000,            // time player has to input the correct sequence
             autoRestartTime: 2000,       // millisecond how long to wait before restart
             flashTime:       300,
-            failTimer:       undefined,
+            failTimerID:     undefined,
             heartBeat:       undefined
         };
         /* end of simon */
