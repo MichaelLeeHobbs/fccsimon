@@ -68,28 +68,24 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             }, /* end of states */
             animation:       {
-                play:  function (animation, nextState) {
-                    var animationTime = animation();
+                play:  function (animation, nextState, view) {
+                    var animationTime = animation(view);
                     this._addEvent(animationTime, this, this._setState, nextState);
                 },
-                error: function () {
-                    // tell view ctrler to flash ! ! on counter
-                    var parent = this;
-                    var time   = this.flashTime;
-                    this.count = '! !';
+                error: function (view) {
+                    var flashTime = 300;
 
-                    // tell view to update before we start flashing
-                    // this.callback();
-
+                    view.count = '! !';
                     var flashFunc = function () {
-                        parent.counterOn = !parent.counterOn;
+                        view.counterOn = !view.counterOn;
                     };
 
                     // tell view to flash ! !
                     for (var i = 1; i < 6; i++) {
-                        $timeout(flashFunc, time * i);
+                        this._addEvent(flashTime, this, flashFunc);
+                        flashTime *= i;
                     }
-                    return time;
+                    return flashTime;
                 }
 
             }, /* end of animation */
