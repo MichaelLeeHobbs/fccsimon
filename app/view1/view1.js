@@ -160,6 +160,9 @@ angular.module('myApp.view1', ['ngRoute'])
                     }
                 }, this);
             },
+            _removeAllEvents: function () {
+                this.events = [];
+            },
             _processEvents:  function (dt) {
                 var marker = 'marker';
                 this.events.push(marker);
