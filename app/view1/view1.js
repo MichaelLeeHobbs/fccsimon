@@ -16,6 +16,13 @@ angular.module('myApp.view1', ['ngRoute'])
         }
 
         var simon = {
+            states: {
+                on: function (){},
+                off: function (){},
+                run: function (){},
+                waiting: function (){},
+                playing: function (){}
+            },
             setCallback: function (callback) {
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
@@ -31,6 +38,9 @@ angular.module('myApp.view1', ['ngRoute'])
                     this._clearTimeOuts();
                     $interval.cancel(this.heartBeat);
                     this.heartBeat = undefined;
+                    // todo we need to add some clean up code - example buttons will stay lit if on/off call while they are lit
+                    // todo might need to move the on/off state change to onUpdate and have it
+                    // todo remove heartbeat there
                     this.callback();
                 } else {
                     // heart beat
