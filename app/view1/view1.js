@@ -18,13 +18,17 @@ angular.module('myApp.view1', ['ngRoute'])
         var simon = {
             states:          {
                 on:        function () {
+                    this.view.gameOn = true;
+                    this.view.counterOn = true;
                     // next state
                     this._addEvent(0, this, this._setState, this.states.ready);
                 },
                 off:       function () {
-                    this.strict = false;
-                    this.count  = '- -';
-                    this._clearTimeOuts();
+                    this.view.gameOn = false;
+                    this.view.strict = false;
+                    this.view.counter  = '- -';
+                    this.view.counterOn = false;
+                    // todo this._clearTimeOuts();
 
                     // todo we need to add some clean up code - example buttons will stay lit if on/off call while they are lit
                     // todo might need to move the on/off state change to onUpdate and have it
@@ -126,7 +130,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this._addEvent(0, this, parent.states.off);
             },
             toggleStrict:    function () {
-                this.strict = !this.strict;
+                this.view.strictOn = !this.view.strictOn;
             },
             _onUpdate:       function (dt) {
                 this._processEvents(dt);
@@ -173,17 +177,17 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.failTimer = undefined;
                 }
                 this.promises     = [];
-                this._setState('starting', 0);
-                this.count        = '- -';
+                // todo this._setState('starting', 0);
+                this.view.counter        = '- -';
                 this.seqCount     = 0;
                 this.seqNum       = 0;
                 this.timeDelay    = 1500;
-                this.btnGreen     = false;
-                this.btnRed       = false;
-                this.btnBlue      = false;
-                this.btnYellow    = false;
+                this.view.btnGreen     = false;
+                this.view.btnRed       = false;
+                this.view.btnBlue      = false;
+                this.view.btnYellow    = false;
                 this.btnFlashTime = 1000;
-                this.sndToPlay    = undefined;
+                this.view.sndToPlay    = undefined;
             },
 
             start:             function () {
@@ -333,36 +337,41 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             },
             getSoundToPlay:  function () {
-                var result     = this.sndToPlay;
-                this.sndToPlay = undefined;
+                var result     = this.view.sndToPlay;
+                this.view.sndToPlay = undefined;
                 return result;
             },
             getOnOffState:   function () {
                 return this.state !== this.states.off && this.state !== undefined;
             },
+            view:            {
+                btnGreen:  false,
+                btnRed:    false,
+                btnBlue:   false,
+                btnYellow: false,
+                sndToPlay: undefined,
+                counter:   '- -',
+                counterOn: false,
+                strictOn:  false,
+                gameOn:    false
+            },
+            sounds:          {
+                btnGreenSnd:  'assets/sounds/simonSound1.mp3',
+                btnRedSnd:    'assets/sounds/simonSound2.mp3',
+                btnBlueSnd:   'assets/sounds/simonSound3.mp3',
+                btnYellowSnd: 'assets/sounds/simonSound4.mp3',
+            },
             events:          [],
             state:           undefined,
-            counterOn:       false,
-            strict:          false,
-            count:           '- -',
             sequence:        [],
             seqCount:        0,
             seqNum:          0,
             promises:        [],
-            btnGreen:        false,
-            btnGreenSnd:     'assets/sounds/simonSound1.mp3',
-            btnRed:          false,
-            btnRedSnd:       'assets/sounds/simonSound2.mp3',
-            btnBlue:         false,
-            btnBlueSnd:      'assets/sounds/simonSound3.mp3',
-            btnYellow:       false,
-            btnYellowSnd:    'assets/sounds/simonSound4.mp3',
             timeDelay:       1250,            // millisecond time delay between buttons
             btnFlashTime:    750,         // millisecond how long to leave a button on.
             inputTimeOut:    8000,            // time player has to input the correct sequence
             autoRestartTime: 2000,       // millisecond how long to wait before restart
             flashTime:       300,
-            sndToPlay:       undefined,
             failTimer:       undefined,
             heartBeat:       undefined
         };
@@ -370,14 +379,14 @@ angular.module('myApp.view1', ['ngRoute'])
 
         var onOffSwitch    = false;
         var updateView     = function () {
-            $scope.onOff       = simon.getOnOffState();
-            $scope.counterOn   = simon.counterOn;
-            $scope.strictLed   = simon.strict;
-            $scope.count       = simon.count;
-            $scope.greenBtnOn  = simon.btnGreen;
-            $scope.redBtnOn    = simon.btnRed;
-            $scope.blueBtnOn   = simon.btnBlue;
-            $scope.yellowBtnOn = simon.btnYellow;
+            $scope.onOff       = simon.view.gameOn;
+            $scope.counterOn   = simon.view.counterOn;
+            $scope.strictLed   = simon.view.strictOn;
+            $scope.count       = simon.view.counter;
+            $scope.greenBtnOn  = simon.view.btnGreen;
+            $scope.redBtnOn    = simon.view.btnRed;
+            $scope.blueBtnOn   = simon.view.btnBlue;
+            $scope.yellowBtnOn = simon.view.btnYellow;
 
             var sndToPlay = simon.getSoundToPlay();
             if (sndToPlay !== undefined) {
