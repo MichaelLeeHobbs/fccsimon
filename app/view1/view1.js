@@ -18,15 +18,15 @@ angular.module('myApp.view1', ['ngRoute'])
         var simon = {
             states:          {
                 on:        function () {
-                    this.view.gameOn = true;
+                    this.view.gameOn    = true;
                     this.view.counterOn = true;
                     // next state
                     this._addEvent(0, this, this._setState, this.states.ready);
                 },
                 off:       function () {
-                    this.view.gameOn = false;
-                    this.view.strict = false;
-                    this.view.counter  = '- -';
+                    this.view.gameOn    = false;
+                    this.view.strict    = false;
+                    this.view.counter   = '- -';
                     this.view.counterOn = false;
                     // todo this._clearTimeOuts();
 
@@ -176,24 +176,26 @@ angular.module('myApp.view1', ['ngRoute'])
                     $timeout.cancel(this.failTimer);
                     this.failTimer = undefined;
                 }
-                this.promises     = [];
+                this.promises = [];
                 // todo this._setState('starting', 0);
-                this.view.counter        = '- -';
-                this.seqCount     = 0;
-                this.seqNum       = 0;
-                this.timeDelay    = 1500;
-                this.view.btnGreen     = false;
-                this.view.btnRed       = false;
-                this.view.btnBlue      = false;
-                this.view.btnYellow    = false;
-                this.btnFlashTime = 1000;
-                this.view.sndToPlay    = undefined;
+                this.view.counter   = '- -';
+                this.seqCount       = 0;
+                this.seqNum         = 0;
+                this.timeDelay      = 1500;
+                this.view.btnGreen  = false;
+                this.view.btnRed    = false;
+                this.view.btnBlue   = false;
+                this.view.btnYellow = false;
+                this.btnFlashTime   = 1000;
+                this.view.sndToPlay = undefined;
             },
 
             start:             function () {
-                if (!this.getOnOffState()) {
+                if (!this.view.gameOn) {
                     return;
                 }
+                console.log('starting');
+
                 // make sure we are in a good state
                 this._cleanup();
 
@@ -291,7 +293,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 var delay = this.timeDelay;
                 // set state to playing to prevent user actions other than on/off
                 var parent = this;
-                this._addEvent(0, this, this._setState, parent.states.playing);
+                this._addEvent(0, this, this._setState, parent.states.animating);
 
                 for (var i = 0; i < this.seqCount + 1; i++) {
                     // button on
@@ -315,12 +317,12 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             },
             _btnOn:            function (btn) {
-                this[btn]      = true;
-                this.sndToPlay = this[btn + 'Snd'];
+                this.view[btn]      = true;
+                this.view.sndToPlay = this.view[btn + 'Snd'];
             },
             _btnOff:           function (btn) {
-                this[btn]      = false;
-                this.sndToPlay = undefined;
+                this.view[btn]      = false;
+                this.view.sndToPlay = undefined;
             },
 
             _clearTimeOuts:  function () {
@@ -337,12 +339,9 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             },
             getSoundToPlay:  function () {
-                var result     = this.view.sndToPlay;
+                var result          = this.view.sndToPlay;
                 this.view.sndToPlay = undefined;
                 return result;
-            },
-            getOnOffState:   function () {
-                return this.state !== this.states.off && this.state !== undefined;
             },
             view:            {
                 btnGreen:  false,
