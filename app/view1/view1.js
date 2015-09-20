@@ -43,17 +43,17 @@ angular.module('myApp.view1', ['ngRoute'])
                 waiting:   function () {
                 },
                 animating: function () {
+                    // empty marker state
                 },
-
-                playing: function () {
+                playing:   function () {
                 },
-                start:   function () {
-
-                },
-                restart: function () {
+                start:     function () {
 
                 },
-                failed:  function () {
+                restart:   function () {
+
+                },
+                failed:    function () {
                     console.log('failed');
                     // player failed for some reason, we don't care why
 
@@ -69,13 +69,15 @@ angular.module('myApp.view1', ['ngRoute'])
             }, /* end of states */
             animation:       {
                 play:  function (animation, nextState, view) {
+                    var parent        = this;
+                    this._addEvent(0, this, this._setState, parent.states.animating);
                     var animationTime = animation(view);
                     this._addEvent(animationTime, this, this._setState, nextState);
                 },
                 error: function (view) {
                     var flashTime = 300;
 
-                    view.count = '! !';
+                    view.count    = '! !';
                     var flashFunc = function () {
                         view.counterOn = !view.counterOn;
                     };
