@@ -42,140 +42,167 @@ angular.module('myApp.view1', ['ngRoute'])
                 },
                 waiting: function () {
                 },
+                animating: function () {
+                },
+
                 playing: function () {
-                }
-            },
-            _startHeartBeat: function () {
-                // heart beat
-                var parent = this;
-                var lastTick = Date.now();
-                var updateTick = function () {
-                    var tick = Date.now();
-                    parent._onUpdate(tick - lastTick);
-                    lastTick = tick;
-                };
-                this.heartBeat = $interval(updateTick, 33, 0, true);
-            },
-            _stopHeartBeat: function () {
-                $interval.cancel(this.heartBeat);
-                this.heartBeat = undefined;
-            },
-            _setCallback: function (callback) {
-                if (callback === undefined) {
-                    stackTrace('callback undefined!');
-                }
-                this.callback = callback;
-            },
-            on: function (callback) {
-                if (callback === undefined) {
-                    stackTrace('callback cannot be undefined!');
-                }
-                this._setCallback(callback);
-                this._startHeartBeat();
-                var parent = this;
-                this._addEvent(0, this, parent.states.on);
-            },
-            off: function () {
-                var parent = this;
-                this._addEvent(0, this, parent.states.off);
-            },
-            toggleStrict: function () {
-                this.strict = !this.strict;
-            },
-            _onUpdate: function (dt) {
-                this._processEvents(dt);
+                },
+                failed: function () {
+                    console.log('failed');
+                    // player failed for some reason, we dont care why
+                    // if strict that's it game over / restart
+                    if (this.strict) {
 
-                // tell view to update
-                this.callback();
-                //$scope.$apply();
-            },
-            _addEvent: function (delay, scope, func, prams) {
-                var id = this.events.length;
-                this.events.push({id: id, scope: scope, delay: delay, func: func, prams: prams});
-                return id;
-            },
-            _removeEvent: function (id) {
-                this.events.some(function (element, index) {
-                    if (element.id === id) {
-                        this.events[index] = undefined;
-                        return true;
+                        // todo
+
+                        return;
                     }
-                }, this);
-            },
-            _processEvents: function (dt) {
-                var marker = 'marker';
-                this.events.push(marker);
 
-                var shifted;
-                do {
-                    shifted = this.events.shift();
-                    if (shifted !== marker) {
-                        shifted.delay -= dt;
-                        if (shifted.delay <= 0) {
-                            shifted.func.bind(shifted.scope)(shifted.prams);
-                        } else {
-                            this.events.push(shifted);
+                    // if not strict then replay sequence
+                    this._playSequence('waiting');
+                    this.seqNum = 0;
+                },
+                animation: {
+                    error: function () {
+                        // tell view ctrler to flash ! ! on counter
+                        var parent = this;
+                        var time = this.flashTime;
+                        this.count = '! !';
+
+                        // tell view to update before we start flashing
+                        // this.callback();
+
+                        var flashFunc = function () {
+                            parent.counterOn = !parent.counterOn;
+                        };
+
+                        // tell view to flash ! !
+                        for (var i = 1; i < 6; i++) {
+                            $timeout(flashFunc, time * i);
                         }
+                        return time;
                     }
-                } while (shifted !== marker);
-            },
-            _cleanup: function () {
-                // kill any lingering failTimers
-                // todo
-                if (this.failTimer !== undefined) {
-                    $timeout.cancel(this.failTimer);
-                    this.failTimer = undefined;
-                }
-                this.promises = [];
-                this._setState('starting', 0);
-                this.count = '- -';
-                this.seqCount = 0;
-                this.seqNum = 0;
-                this.timeDelay = 1500;
-                this.btnGreen = false;
-                this.btnRed = false;
-                this.btnBlue = false;
-                this.btnYellow = false;
-                this.btnFlashTime = 1000;
-                this.sndToPlay = undefined;
-            },
+                },
+                _startHeartBeat: function () {
+                    // heart beat
+                    var parent = this;
+                    var lastTick = Date.now();
+                    var updateTick = function () {
+                        var tick = Date.now();
+                        parent._onUpdate(tick - lastTick);
+                        lastTick = tick;
+                    };
+                    this.heartBeat = $interval(updateTick, 33, 0, true);
+                },
+                _stopHeartBeat: function () {
+                    $interval.cancel(this.heartBeat);
+                    this.heartBeat = undefined;
+                },
+                _setCallback: function (callback) {
+                    if (callback === undefined) {
+                        stackTrace('callback undefined!');
+                    }
+                    this.callback = callback;
+                },
+                on: function (callback) {
+                    if (callback === undefined) {
+                        stackTrace('callback cannot be undefined!');
+                    }
+                    this._setCallback(callback);
+                    this._startHeartBeat();
+                    var parent = this;
+                    this._addEvent(0, this, parent.states.on);
+                },
+                off: function () {
+                    var parent = this;
+                    this._addEvent(0, this, parent.states.off);
+                },
+                toggleStrict: function () {
+                    this.strict = !this.strict;
+                },
+                _onUpdate: function (dt) {
+                    this._processEvents(dt);
 
-            start: function () {
-                if (!this.getOnOffState()) {
-                    return;
-                }
-                // make sure we are in a good state
-                this._cleanup();
+                    // tell view to update
+                    this.callback();
+                    //$scope.$apply();
+                },
+                _addEvent: function (delay, scope, func, prams) {
+                    var id = this.events.length;
+                    this.events.push({id: id, scope: scope, delay: delay, func: func, prams: prams});
+                    return id;
+                },
+                _removeEvent: function (id) {
+                    this.events.some(function (element, index) {
+                        if (element.id === id) {
+                            this.events[index] = undefined;
+                            return true;
+                        }
+                    }, this);
+                },
+                _processEvents: function (dt) {
+                    var marker = 'marker';
+                    this.events.push(marker);
 
-                // generate a sequence
-                this._generateSequence();
-
-                // play sequence
-                var delay = this._playSequence();
-
-                // set state to run
-                var parent = this;
-                this._addEvent(delay, this, this._setState, parent.states.run);
-            },
-            _setState: function (newState) {
-                this.state = newState;
-            },
-
-            //todo rewrite
-            _failed: function () {
-                console.log('_failed');
-                // player failed for some reason, we dont care why
-                // if strict that's it game over / restart
-                if (this.strict) {
-
+                    var shifted;
+                    do {
+                        shifted = this.events.shift();
+                        if (shifted !== marker) {
+                            shifted.delay -= dt;
+                            if (shifted.delay <= 0) {
+                                shifted.func.bind(shifted.scope)(shifted.prams);
+                            } else {
+                                this.events.push(shifted);
+                            }
+                        }
+                    } while (shifted !== marker);
+                },
+                _cleanup: function () {
+                    // kill any lingering failTimers
                     // todo
+                    if (this.failTimer !== undefined) {
+                        $timeout.cancel(this.failTimer);
+                        this.failTimer = undefined;
+                    }
+                    this.promises = [];
+                    this._setState('starting', 0);
+                    this.count = '- -';
+                    this.seqCount = 0;
+                    this.seqNum = 0;
+                    this.timeDelay = 1500;
+                    this.btnGreen = false;
+                    this.btnRed = false;
+                    this.btnBlue = false;
+                    this.btnYellow = false;
+                    this.btnFlashTime = 1000;
+                    this.sndToPlay = undefined;
+                },
 
-                    return;
-                }
+                start: function () {
+                    if (!this.getOnOffState()) {
+                        return;
+                    }
+                    // make sure we are in a good state
+                    this._cleanup();
 
-                // if not strict then replay sequence
-                this._playSequence('waiting');
-                this.seqNum = 0;
+                    // generate a sequence
+                    this._generateSequence();
+
+                    // play sequence
+                    var delay = this._playSequence();
+
+                    // set state to run
+                    var parent = this;
+                    this._addEvent(delay, this, this._setState, parent.states.run);
+
+                    // add event to time out if they take too long to input buttons
+                    // keep event id so we can cancel it
+                    this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
+                },
+                _setState: function (newState) {
+                    this.state = newState;
+                },
+
             },
             btnInput: function (color) {
                 if (this.state !== 'waiting') {
@@ -218,8 +245,8 @@ angular.module('myApp.view1', ['ngRoute'])
 
                     }
                 } else {
-                    // bad input
-                    this._error();
+                    // bad input - set state to failed
+                    this._addEvent(0, this, this._setState, parent.states.failed);
                 }
 
                 console.log('btnInput  done' + '  state: ' + this.state);
@@ -285,25 +312,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this[btn] = false;
                 this.sndToPlay = undefined;
             },
-            _error: function () {
-                // tell view ctrler to flash ! ! on counter
-                var parent = this;
-                var time = this.flashTime;
-                this.count = '! !';
 
-                // tell view to update before we start flashing
-                // this.callback();
-
-                var flashFunc = function () {
-                    parent.counterOn = !parent.counterOn;
-                };
-
-                // tell view to flash ! !
-                for (var i = 1; i < 6; i++) {
-                    $timeout(flashFunc, time * i);
-                }
-                return time;
-            },
             _clearTimeOuts: function () {
                 this.promises.forEach(function (func) {
                     if (func !== undefined) {
@@ -344,7 +353,7 @@ angular.module('myApp.view1', ['ngRoute'])
             btnYellowSnd: 'assets/sounds/simonSound4.mp3',
             timeDelay: 1250,            // millisecond time delay between buttons
             btnFlashTime: 750,         // millisecond how long to leave a button on.
-            inputTime: 8000,            // time player has to input the correct sequence
+            inputTimeOut: 8000,            // time player has to input the correct sequence
             autoRestartTime: 2000,       // millisecond how long to wait before restart
             flashTime: 300,
             sndToPlay: undefined,
