@@ -287,6 +287,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.sequence.push(num);
                 }
             },
+            // todo turn playSequence into an animation
             _playSequence:     function () {
                 console.log('_playSequence');
 
@@ -304,6 +305,14 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
                 return delay;
             },
+            _btnOn:            function (btn) {
+                this.view[btn]      = true;
+                this.view.sndToPlay = this.view[btn + 'Snd'];
+            },
+            _btnOff:           function (btn) {
+                this.view[btn]      = false;
+                this.view.sndToPlay = undefined;
+            },
             _getBtn:           function (nbr) {
                 switch (nbr) {
                     case 1:
@@ -315,14 +324,6 @@ angular.module('myApp.view1', ['ngRoute'])
                     case 4:
                         return 'btnYellow';
                 }
-            },
-            _btnOn:            function (btn) {
-                this.view[btn]      = true;
-                this.view.sndToPlay = this.view[btn + 'Snd'];
-            },
-            _btnOff:           function (btn) {
-                this.view[btn]      = false;
-                this.view.sndToPlay = undefined;
             },
 
             _clearTimeOuts:  function () {
