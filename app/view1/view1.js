@@ -30,11 +30,9 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.view.strict    = false;
                     this.view.counter   = '- -';
                     this.view.counterOn = false;
-                    // todo this._clearTimeOuts();
 
-                    // todo we need to add some clean up code - example buttons will stay lit if on/off call while they are lit
-                    // todo might need to move the on/off state change to onUpdate and have it
-                    // todo remove heartbeat there
+                    // clean up
+                    this._cleanup();
 
                     // set state to undefined - this is our initial state
                     this._addEvent(0, this, this._setState, undefined);
@@ -181,23 +179,17 @@ angular.module('myApp.view1', ['ngRoute'])
                 } while (shifted !== marker);
             },
             _cleanup:        function () {
-                // kill any lingering failTimers
-                // todo
-                if (this.failTimer !== undefined) {
-                    $timeout.cancel(this.failTimer);
-                    this.failTimer = undefined;
-                }
-                this.promises = [];
-                // todo this._setState('starting', 0);
+                // clear all events
+                this._removeAllEvents();
+
+                // reset view and other data
                 this.view.counter   = '- -';
                 this.seqCount       = 0;
                 this.seqNum         = 0;
-                this.timeDelay      = 1500;
                 this.view.btnGreen  = false;
                 this.view.btnRed    = false;
                 this.view.btnBlue   = false;
                 this.view.btnYellow = false;
-                this.btnFlashTime   = 1000;
                 this.view.sndToPlay = undefined;
             },
 
