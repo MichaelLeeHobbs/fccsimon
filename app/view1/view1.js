@@ -277,22 +277,6 @@ angular.module('myApp.view1', ['ngRoute'])
                     this._addEvent(0, this, this._setState, parent.states.failed);
                 }
             },
-            _run:              function () {
-                console.log('_run');
-                this._addEvent(0, this, this._setState, 'updating');
-
-                var parent = this;
-
-                // play the sequence up to sequence count + 1
-                // time is how long it will take to complete the playing the sequence
-                // set state to waiting after sequence is done playing
-                var promise = this._playSequence('waiting');
-
-
-                // set timeout for failure i.e. player has this.inputTime to complete the sequence or this._failed is called
-                // store the promise is this.failtimer so we can clear it
-                // todo set fail timer
-            },
             _generateSequence: function () {
                 this.sequence = [];
                 for (var i = 0; i < 20; i++) {
