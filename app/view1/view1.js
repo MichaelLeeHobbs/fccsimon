@@ -322,20 +322,6 @@ angular.module('myApp.view1', ['ngRoute'])
                         return 'btnYellow';
                 }
             },
-
-            _clearTimeOuts:  function () {
-                this.promises.forEach(function (func) {
-                    if (func !== undefined) {
-                        $timeout.cancel(func);
-                    }
-                });
-                this.promises = [];
-
-                if (this.failTimer !== undefined) {
-                    $timeout.cancel(this.failTimer);
-                    this.failTimer = undefined;
-                }
-            },
             getSoundToPlay:  function () {
                 var result          = this.view.sndToPlay;
                 this.view.sndToPlay = undefined;
