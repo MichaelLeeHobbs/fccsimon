@@ -54,8 +54,8 @@ angular.module('myApp.view1', ['ngRoute'])
                     /* state: animating */
                     // empty marker state
                 },
-                playing:   function () {
-                    /* state: playing */
+                updating:   function () {
+                    /* state: updating */
                 },
                 start:     function () {
                     /* state: start */
@@ -301,8 +301,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
 
                 // play sound and light button
-                this._addEvent(0, this, this._btnOn, btn);
-                this._addEvent(this.btnFlashTime, this, this._btnOff, btn);
+                this.animation.play(this, this.animation.buttonFlash, this.states.updating, btn);
 
                 // process input
                 // good input
