@@ -352,14 +352,9 @@ angular.module('myApp.view1', ['ngRoute'])
             _setCounter: function (value){
                 value = value.toString().split('');
                 if (value.length === 1){
-                    value.unshift(' ');
                     value.unshift('0');
-                } else {
-                    var tmp = value[0];
-                    value[0] = ' ';
-                    value.unshift(tmp);
                 }
-                this.view.counter = value.toString();
+                this.view.counter = value.join(' ');
             },
             view:            {
                 btnGreen:  false,
