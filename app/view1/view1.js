@@ -23,6 +23,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.view.counterOn = true;
                     // next state
                     this._addEvent(0, this, this._setState, this.states.ready);
+                    console.log('state on ran');
                 },
                 off:       function () {
                     /* state: off */
@@ -57,13 +58,23 @@ angular.module('myApp.view1', ['ngRoute'])
                 },
                 start:     function () {
                     /* state: start */
-
                 },
                 restart:   function () {
                     /* state: restart */
+
+                    // add event to time out if they take too long to input buttons
+                    // keep event id so we can cancel it
+                    this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
                 },
                 failed:    function () {
                     /* state: failed */
+
+                    // cancel any fail timer - this way it doesnt get called twice
+                    if (this.failTimerID !== undefined) {
+                        this._removeEvent(this.failTimerID);
+                        this.failTimerID = undefined;
+                    }
+
                     console.log('failed');
                     // player failed for some reason, we don't care why
 
@@ -74,30 +85,30 @@ angular.module('myApp.view1', ['ngRoute'])
                     }
 
                     // play animation.error
-                    this.animation.play(this.animation.error, nextState);
+                    this.animation.play(this, this.animation.error, nextState);
                 }
             }, /* end of states */
             animation:       {
-                play:  function (animation, nextState, view) {
-                    var parent        = this;
-                    this._addEvent(0, this, this._setState, parent.states.animating);
-                    var animationTime = animation(view);
-                    this._addEvent(animationTime, this, this._setState, nextState);
+                play:  function (scope, animation, nextState) {
+                    scope._addEvent(0, scope, scope._setState, scope.states.animating);
+                    var animationTime = animation(scope);
+                    scope._addEvent(animationTime, scope, scope._setState, nextState);
                 },
-                error: function (view) {
+                error: function (scope) {
                     var flashTime = 300;
+                    var time = 0;
 
-                    view.count    = '! !';
+                    scope.view.counter    = '! !';
                     var flashFunc = function () {
-                        view.counterOn = !view.counterOn;
+                        scope.view.counterOn = !scope.view.counterOn;
                     };
 
                     // tell view to flash ! !
                     for (var i = 1; i < 6; i++) {
-                        this._addEvent(flashTime, this, flashFunc);
-                        flashTime *= i;
+                        scope._addEvent(time, scope, flashFunc);
+                        time += flashTime;
                     }
-                    return flashTime;
+                    return time;
                 }
 
             }, /* end of animation */
@@ -129,17 +140,26 @@ angular.module('myApp.view1', ['ngRoute'])
                 this._setCallback(callback);
                 this._startHeartBeat();
                 var parent = this;
-                this._addEvent(0, this, parent.states.on);
+                this._addEvent(0, this, this._setState, parent.states.on);
             },
             off:             function () {
                 var parent = this;
-                this._addEvent(0, this, parent.states.off);
+                this._addEvent(0, this, this._setState, parent.states.off);
             },
             toggleStrict:    function () {
                 this.view.strictOn = !this.view.strictOn;
             },
             _onUpdate:       function (dt) {
                 this._processEvents(dt);
+
+                // testing
+                console.log(this.state);
+                if (this.state !== undefined) {
+                    this.state();
+                }
+                /*if (this.state === this.states.off) {
+                    //this.state();
+                }*/
 
                 // tell view to update
                 this.callback();
