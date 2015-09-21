@@ -326,7 +326,7 @@ angular.module('myApp.view1', ['ngRoute'])
             },
             _btnOn:            function (btn) {
                 this.view[btn]      = true;
-                this.view.sndToPlay = this.view[btn + 'Snd'];
+                this.view.sndToPlay = this.sounds[btn + 'Snd'];
             },
             _btnOff:           function (btn) {
                 this.view[btn]      = false;
