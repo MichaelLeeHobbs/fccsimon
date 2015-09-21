@@ -124,7 +124,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     };
 
                     // tell view to flash ! !
-                    for (var i = 1; i < 6; i++) {
+                    for (var i = 1; i < 7; i++) {
                         scope._addEvent(time, scope, flashFunc);
                         time += flashTime;
                     }
@@ -329,10 +329,10 @@ angular.module('myApp.view1', ['ngRoute'])
 
                 for (var i = 0; i < this.seqCount + 1; i++) {
                     // button on
-                    this._addEvent(delay - this.difficulty, this, this._btnOn, this._getBtn(this.sequence[i]));
+                    this._addEvent(delay , this, this._btnOn, this._getBtn(this.sequence[i]));
                     // button off
-                    this._addEvent(delay - this.difficulty + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
-                    delay += this.timeDelay;
+                    this._addEvent(delay + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
+                    delay += this.timeDelay - this.difficulty;
                 }
                 return delay;
             },
@@ -399,7 +399,7 @@ angular.module('myApp.view1', ['ngRoute'])
             level_2:         9,
             level_3:         13,
             difficulty:      0,
-            diffInc:         100,
+            diffInc:         200,
             failTimerID:     undefined,
             heartBeat:       undefined
         };
