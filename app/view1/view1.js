@@ -129,6 +129,25 @@ angular.module('myApp.view1', ['ngRoute'])
                         time += flashTime;
                     }
                     return time;
+                },
+                win: function (scope) {
+                    var spinTime = 50;
+                    var time = 0;
+
+                    var spin = ['| |', '/ /', '- -', '\\ \\'];
+
+                    var flashFunc = function (num) {
+                        scope.view.counterOn = !scope.view.counterOn;
+                        scope.view.counter    = spin[num % 4];
+                    };
+
+                    // tell view to flash ! !
+                    for (var i = 1; i < 101; i++) {
+                        scope._addEvent(time, scope, flashFunc, i);
+                        time += spinTime;
+                    }
+                    return time;
+
                 }
 
             }, /* end of animation */
