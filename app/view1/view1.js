@@ -390,8 +390,8 @@ angular.module('myApp.view1', ['ngRoute'])
             sequence:        [],
             seqCount:        0,                 // end of the current rnd
             seqNum:          0,                 // how many correct buttons player has pushed
-            timeDelay:       1250,              // millisecond time delay between buttons
-            btnFlashTime:    750,               // millisecond how long to leave a button on.
+            timeDelay:       900,              // millisecond time delay between buttons
+            btnFlashTime:    400,               // millisecond how long to leave a button on.
             inputTimeOut:    8000,              // time player has to input the correct sequence
             autoRestartTime: 2000,              // millisecond how long to wait before restart
             flashTime:       300,
