@@ -172,18 +172,12 @@ angular.module('myApp.view1', ['ngRoute'])
             _onUpdate:       function (dt) {
                 this._processEvents(dt);
 
-                // testing
-                //console.log(this.state);
+                // execute state
                 if (this.state !== undefined) {
                     this.state();
                 }
-                /*if (this.state === this.states.off) {
-                    //this.state();
-                }*/
-
                 // tell view to update
                 this.callback();
-                //$scope.$apply();
             },
             _addEvent:       function (delay, scope, func, prams) {
                 var id = this.events.length;
