@@ -270,6 +270,23 @@ angular.module('myApp.view1', ['ngRoute'])
                 if (this.sequence[this.seqNum] === btnNum) {
                     this.seqNum++;
 
+
+                    /* difficulty increase */
+                    if (this.seqNum === this.level_1 || this.seqNum === this.level_2 || this.seqNum === this.level_3) {
+                        this.difficulty += this.diffInc;
+                    }
+
+                    /* win */
+                    if (this.seqNum > 19) {
+                        // cancel fail timer
+                        this._removeEvent(this.failTimerID);
+
+                        // play win animation
+                        this.animation.play(this, this.animation.win, this.states.ready);
+                        return;
+                    }
+
+                    //
                     if (this.seqNum > this.seqCount) {
                         console.log('this.seqNum > this.seqCount');
                         this.seqNum = 0;
@@ -372,12 +389,16 @@ angular.module('myApp.view1', ['ngRoute'])
             sequence:        [],
             seqCount:        0,                 // end of the current rnd
             seqNum:          0,                 // how many correct buttons player has pushed
-            promises:        [],
             timeDelay:       1250,              // millisecond time delay between buttons
             btnFlashTime:    750,               // millisecond how long to leave a button on.
             inputTimeOut:    8000,              // time player has to input the correct sequence
             autoRestartTime: 2000,              // millisecond how long to wait before restart
             flashTime:       300,
+            level_1:         5,
+            level_2:         9,
+            level_3:         13,
+            difficulty:      0,
+            diffInc:         100,
             failTimerID:     undefined,
             heartBeat:       undefined
         };
