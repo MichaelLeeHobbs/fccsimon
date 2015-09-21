@@ -100,7 +100,7 @@ angular.module('myApp.view1', ['ngRoute'])
 
                     var nextState = this.states.restart;
                     // if strict that's it game over / restart
-                    if (this.strict) {
+                    if (this.view.strictOn) {
                         nextState = this.states.start;
                     }
 
