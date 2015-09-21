@@ -58,9 +58,22 @@ angular.module('myApp.view1', ['ngRoute'])
                 },
                 start:     function () {
                     /* state: start */
+
+                    // clean up
+                    this._cleanup();
+
+                    // generate a sequence
+                    this._generateSequence();
+
+                    // set start to restart - this was done to avoid code duplication as
+                    // restart already dose what needed to be done to start
+                    var parent = this;
+                    this.failTimerID = this._addEvent(0, this, this._setState, parent.states.restart);
                 },
                 restart:   function () {
                     /* state: restart */
+                    this.seqNum = 0;
+
                     // play sequence
                     var delay = this._playSequence();
 
@@ -225,22 +238,9 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
                 console.log('starting');
 
-                // make sure we are in a good state
-                this._cleanup();
-
-                // generate a sequence
-                this._generateSequence();
-
-                // play sequence
-                var delay = this._playSequence();
-
-                // set state to run
+                // set state to start
                 var parent = this;
-                this._addEvent(delay, this, this._setState, parent.states.run);
-
-                // add event to time out if they take too long to input buttons
-                // keep event id so we can cancel it
-                this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
+                this._addEvent(0, this, this._setState, parent.states.start);
             },
             _setState:         function (newState) {
                 this.state = newState;
@@ -368,13 +368,13 @@ angular.module('myApp.view1', ['ngRoute'])
             events:          [],
             state:           undefined,
             sequence:        [],
-            seqCount:        0,
-            seqNum:          0,
+            seqCount:        0,                 // end of the current rnd
+            seqNum:          0,                 // how many correct buttons player has pushed
             promises:        [],
-            timeDelay:       1250,            // millisecond time delay between buttons
-            btnFlashTime:    750,         // millisecond how long to leave a button on.
-            inputTimeOut:    8000,            // time player has to input the correct sequence
-            autoRestartTime: 2000,       // millisecond how long to wait before restart
+            timeDelay:       1250,              // millisecond time delay between buttons
+            btnFlashTime:    750,               // millisecond how long to leave a button on.
+            inputTimeOut:    8000,              // time player has to input the correct sequence
+            autoRestartTime: 2000,              // millisecond how long to wait before restart
             flashTime:       300,
             failTimerID:     undefined,
             heartBeat:       undefined
