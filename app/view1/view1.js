@@ -109,9 +109,9 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             }, /* end of states */
             animation:       {
-                play:  function (scope, animation, nextState) {
+                play:  function (scope, animation, nextState, prams) {
                     scope._addEvent(0, scope, scope._setState, scope.states.animating);
-                    var animationTime = animation(scope);
+                    var animationTime = animation(scope, prams);
                     scope._addEvent(animationTime, scope, scope._setState, nextState);
                 },
                 error: function (scope) {
@@ -147,9 +147,22 @@ angular.module('myApp.view1', ['ngRoute'])
                         time += spinTime;
                     }
                     return time;
+                },
+                buttonFlash: function (scope, prams) {
+                    var btn = prams;
+                    var btnOn = function (btn) {
+                        scope.view[btn]      = true;
+                        scope.view.sndToPlay = scope.sounds[btn + 'Snd'];
+                    };
+                    var btnOff = function (btn) {
+                        scope.view[btn]      = false;
+                        scope.view.sndToPlay = undefined;
+                    };
 
+                    scope._addEvent(0, scope, btnOn, btn);
+                    scope._addEvent(scope.flashTime, scope, btnOff, btn);
+                    return scope.flashTime;
                 }
-
             }, /* end of animation */
             _startHeartBeat: function () {
                 // heart beat
@@ -187,6 +200,13 @@ angular.module('myApp.view1', ['ngRoute'])
             },
             toggleStrict:    function () {
                 this.view.strictOn = !this.view.strictOn;
+
+                /* test code */
+                /*
+                this.seqCount = 19;
+                this.seqNum = 18;
+                console.log(this.sequence);
+                */
             },
             _onUpdate:       function (dt) {
                 this._processEvents(dt);
@@ -461,12 +481,4 @@ angular.module('myApp.view1', ['ngRoute'])
         };
         updateView();
 
-        /*
-         simon.toggleOnOff();
-         simon._generateSequence();
-         simon.seqCount = 19;
-         simon._playSequence('testing');
-         */
-
-    }])
-;
+    }]);
