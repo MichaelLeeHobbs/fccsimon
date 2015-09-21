@@ -61,6 +61,12 @@ angular.module('myApp.view1', ['ngRoute'])
                 },
                 restart:   function () {
                     /* state: restart */
+                    // play sequence
+                    var delay = this._playSequence();
+
+                    // set state to run
+                    var parent = this;
+                    this._addEvent(delay, this, this._setState, parent.states.run);
 
                     // add event to time out if they take too long to input buttons
                     // keep event id so we can cancel it
@@ -153,7 +159,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this._processEvents(dt);
 
                 // testing
-                console.log(this.state);
+                //console.log(this.state);
                 if (this.state !== undefined) {
                     this.state();
                 }
