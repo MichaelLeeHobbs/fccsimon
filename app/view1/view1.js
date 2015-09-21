@@ -45,6 +45,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 },
                 run:       function () {
                     /* state: run */
+                    this.view.counter = this.seqCount + 1;
                 },
                 waiting:   function () {
                     /* state: waiting */
