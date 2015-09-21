@@ -45,7 +45,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 },
                 run:       function () {
                     /* state: run */
-                    this.view.counter = this.seqCount + 1;
+                    this._setCounter(this.seqCount + 1);
                 },
                 waiting:   function () {
                     /* state: waiting */
@@ -348,6 +348,18 @@ angular.module('myApp.view1', ['ngRoute'])
                 var result          = this.view.sndToPlay;
                 this.view.sndToPlay = undefined;
                 return result;
+            },
+            _setCounter: function (value){
+                value = value.toString().split('');
+                if (value.length === 1){
+                    value.unshift(' ');
+                    value.unshift('0');
+                } else {
+                    var tmp = value[0];
+                    value[0] = ' ';
+                    value.unshift(tmp);
+                }
+                this.view.counter = value.toString();
             },
             view:            {
                 btnGreen:  false,
