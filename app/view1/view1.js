@@ -220,6 +220,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.view.counter   = '- -';
                 this.seqCount       = 0;
                 this.seqNum         = 0;
+                this.difficulty     = 0;
                 this.view.btnGreen  = false;
                 this.view.btnRed    = false;
                 this.view.btnBlue   = false;
@@ -328,9 +329,9 @@ angular.module('myApp.view1', ['ngRoute'])
 
                 for (var i = 0; i < this.seqCount + 1; i++) {
                     // button on
-                    this._addEvent(delay, this, this._btnOn, this._getBtn(this.sequence[i]));
+                    this._addEvent(delay - this.difficulty, this, this._btnOn, this._getBtn(this.sequence[i]));
                     // button off
-                    this._addEvent(delay + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
+                    this._addEvent(delay - this.difficulty + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
                     delay += this.timeDelay;
                 }
                 return delay;
