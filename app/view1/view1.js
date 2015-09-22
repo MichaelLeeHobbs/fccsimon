@@ -70,22 +70,22 @@ angular.module('myApp.view1', ['ngRoute'])
                     // set start to restart - this was done to avoid code duplication as
                     // restart already dose what needed to be done to start
                     var parent       = this;
-                    this.failTimerID = this._addEvent(0, this, this._setState, parent.states.restart);
+                    this._addEvent(0, this, this._setState, parent.states.restart);
                 },
                 restart:   function () {
                     /* state: restart */
                     this.seqNum = 0;
 
                     // play sequence
-                    var delay = this._playSequence();
-
-                    // set state to run
-                    var parent = this;
-                    this._addEvent(delay, this, this._setState, parent.states.run);
+                    // prams[timeDelay, sequence, stop, modifier]
+                    var prams = [this.timeDelay, this.sequence, this.seqCount + 1, this.difficulty];
+                    console.log('82');
+                    var delay = this.animation.play(this, this.animation.playSequence, this.states.run, prams);
 
                     // add event to time out if they take too long to input buttons
                     // keep event id so we can cancel it
-                    this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
+                    console.log('delay: ' + delay);
+                    this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, this.states.failed);
                 },
                 failed:    function () {
                     /* state: failed */
@@ -113,7 +113,9 @@ angular.module('myApp.view1', ['ngRoute'])
                 play:        function (scope, animation, nextState, prams) {
                     scope._addEvent(0, scope, scope._setState, scope.states.animating);
                     var animationTime = animation(scope, prams);
+                    console.log('play: nextState: ' + nextState);
                     scope._addEvent(animationTime, scope, scope._setState, nextState);
+                    return animationTime;
                 },
                 error:       function (scope) {
                     var flashTime = 300;
@@ -164,6 +166,20 @@ angular.module('myApp.view1', ['ngRoute'])
                     scope._addEvent(time, scope, btnOn, btn);
                     scope._addEvent(time + scope.flashTime, scope, btnOff, btn);
                     return scope.flashTime;
+                },
+                // prams[timeDelay, sequence, stop, modifier]
+                playSequence: function (scope, prams) {
+                    var delay = prams[0];       // timeDelay;
+                    var timeDelay = prams[0];
+                    var sequence = prams[1];
+                    var stop = prams[2];
+                    var modifier = prams[3];
+                    // prams[2] = scope.seqCount + 1
+                    for (var i = 0; i < stop; i++) {
+                        scope.animation.play(scope, scope.animation.buttonFlash, scope.states.animating, [scope._getBtn(sequence[i]), delay]);
+                        delay += timeDelay - modifier;
+                    }
+                    return delay;
                 }
             }, /* end of animation */
             _startHeartBeat:  function () {
@@ -221,6 +237,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.callback();
             },
             _addEvent:        function (delay, scope, func, prams) {
+                console.log('addEvent: delay: ' + delay + ' prams: ' + prams);
                 var id = this.events.length;
                 this.events.push({id: id, scope: scope, delay: delay, func: func, prams: prams});
                 return id;
@@ -340,13 +357,17 @@ angular.module('myApp.view1', ['ngRoute'])
                         this._removeEvent(this.failTimerID);
 
                         // play sequence
-                        delay += this._playSequence(parent.states.run);
+                        // prams[timeDelay, sequence, stop, modifier]
+                        var prams = [this.timeDelay, this.sequence, this.seqCount + 1, this.difficulty];
+                        console.log('361');
+                        delay += this.animation.play(this, this.animation.playSequence, this.states.updating, prams);
 
                         // set state to run
                         this._addEvent(delay, this, this._setState, parent.states.run);
 
                         // add event to time out if they take too long to input buttons
                         // keep event id so we can cancel it
+                        console.log('delay: ' + delay);
                         this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
                         return;
                     }
@@ -364,22 +385,6 @@ angular.module('myApp.view1', ['ngRoute'])
                     var num = Math.floor(Math.random() * (5 - 1)) + 1;
                     this.sequence.push(num);
                 }
-            },
-            // todo turn playSequence into an animation
-            _playSequence:     function (nextState) {
-                console.log('_playSequence');
-
-                var delay = this.timeDelay;
-                // set state to playing to prevent user actions other than on/off
-                var parent = this;
-                //this._addEvent(0, this, this._setState, parent.states.animating);
-
-                for (var i = 0; i < this.seqCount + 1; i++) {
-                    this.animation.play(this, parent.animation.buttonFlash, parent.states.animating, [this._getBtn(this.sequence[i]), delay]);
-                    delay += this.timeDelay - this.difficulty;
-                }
-                this._addEvent(delay, this, this._setState, nextState);
-                return delay;
             },
             _getBtn:           function (nbr) {
                 switch (nbr) {
