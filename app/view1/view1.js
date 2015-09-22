@@ -1,8 +1,8 @@
-'use strict';
+/*global console, angular, Audio */
 
 angular.module('myApp.view1', ['ngRoute'])
-
     .config(['$routeProvider', function ($routeProvider) {
+        'use strict';
         $routeProvider.when('/', {
             templateUrl: 'view1/view1.html',
             controller:  'View1Ctrl'
@@ -10,6 +10,7 @@ angular.module('myApp.view1', ['ngRoute'])
     }])
 
     .controller('View1Ctrl', ['$scope', '$timeout', '$interval', function ($scope, $timeout, $interval) {
+        'use strict';
         function stackTrace(msg) {
             var err = new Error(msg);
             throw err.stack;
@@ -419,7 +420,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 btnGreenSnd:  'assets/sounds/simonSound1.mp3',
                 btnRedSnd:    'assets/sounds/simonSound2.mp3',
                 btnBlueSnd:   'assets/sounds/simonSound3.mp3',
-                btnYellowSnd: 'assets/sounds/simonSound4.mp3',
+                btnYellowSnd: 'assets/sounds/simonSound4.mp3'
             },
             events:            [],
             state:             undefined,
