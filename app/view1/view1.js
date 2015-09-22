@@ -16,7 +16,7 @@ angular.module('myApp.view1', ['ngRoute'])
         }
 
         var simon = {
-            states:          {
+            states:           {
                 on:        function () {
                     /* state: on */
                     this.view.gameOn    = true;
@@ -54,7 +54,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     /* state: animating */
                     // empty marker state
                 },
-                updating:   function () {
+                updating:  function () {
                     /* state: updating */
                 },
                 start:     function () {
@@ -68,7 +68,7 @@ angular.module('myApp.view1', ['ngRoute'])
 
                     // set start to restart - this was done to avoid code duplication as
                     // restart already dose what needed to be done to start
-                    var parent = this;
+                    var parent       = this;
                     this.failTimerID = this._addEvent(0, this, this._setState, parent.states.restart);
                 },
                 restart:   function () {
@@ -108,18 +108,18 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.animation.play(this, this.animation.error, nextState);
                 }
             }, /* end of states */
-            animation:       {
-                play:  function (scope, animation, nextState, prams) {
+            animation:        {
+                play:        function (scope, animation, nextState, prams) {
                     scope._addEvent(0, scope, scope._setState, scope.states.animating);
                     var animationTime = animation(scope, prams);
                     scope._addEvent(animationTime, scope, scope._setState, nextState);
                 },
-                error: function (scope) {
+                error:       function (scope) {
                     var flashTime = 300;
-                    var time = 0;
+                    var time      = 0;
 
-                    scope.view.counter    = '! !';
-                    var flashFunc = function () {
+                    scope.view.counter = '! !';
+                    var flashFunc      = function () {
                         scope.view.counterOn = !scope.view.counterOn;
                     };
 
@@ -130,15 +130,15 @@ angular.module('myApp.view1', ['ngRoute'])
                     }
                     return time;
                 },
-                win: function (scope) {
+                win:         function (scope) {
                     var spinTime = 50;
-                    var time = 0;
+                    var time     = 0;
 
                     var spin = ['| |', '/ /', '- -', '\\ \\'];
 
                     var flashFunc = function (num) {
                         scope.view.counterOn = !scope.view.counterOn;
-                        scope.view.counter    = spin[num % 4];
+                        scope.view.counter   = spin[num % 4];
                     };
 
                     // tell view to flash ! !
@@ -149,8 +149,9 @@ angular.module('myApp.view1', ['ngRoute'])
                     return time;
                 },
                 buttonFlash: function (scope, prams) {
-                    var btn = prams;
-                    var btnOn = function (btn) {
+                    var btn    = prams[0];
+                    var time   = prams[1];
+                    var btnOn  = function (btn) {
                         scope.view[btn]      = true;
                         scope.view.sndToPlay = scope.sounds[btn + 'Snd'];
                     };
@@ -159,12 +160,12 @@ angular.module('myApp.view1', ['ngRoute'])
                         scope.view.sndToPlay = undefined;
                     };
 
-                    scope._addEvent(0, scope, btnOn, btn);
-                    scope._addEvent(scope.flashTime, scope, btnOff, btn);
+                    scope._addEvent(time, scope, btnOn, btn);
+                    scope._addEvent(time + scope.flashTime, scope, btnOff, btn);
                     return scope.flashTime;
                 }
             }, /* end of animation */
-            _startHeartBeat: function () {
+            _startHeartBeat:  function () {
                 // heart beat
                 var parent     = this;
                 var lastTick   = Date.now();
@@ -175,17 +176,17 @@ angular.module('myApp.view1', ['ngRoute'])
                 };
                 this.heartBeat = $interval(updateTick, 33, 0, true);
             },
-            _stopHeartBeat:  function () {
+            _stopHeartBeat:   function () {
                 $interval.cancel(this.heartBeat);
                 this.heartBeat = undefined;
             },
-            _setCallback:    function (callback) {
+            _setCallback:     function (callback) {
                 if (callback === undefined) {
                     stackTrace('callback undefined!');
                 }
                 this.callback = callback;
             },
-            on:              function (callback) {
+            on:               function (callback) {
                 if (callback === undefined) {
                     stackTrace('callback cannot be undefined!');
                 }
@@ -194,21 +195,21 @@ angular.module('myApp.view1', ['ngRoute'])
                 var parent = this;
                 this._addEvent(0, this, this._setState, parent.states.on);
             },
-            off:             function () {
+            off:              function () {
                 var parent = this;
                 this._addEvent(0, this, this._setState, parent.states.off);
             },
-            toggleStrict:    function () {
+            toggleStrict:     function () {
                 this.view.strictOn = !this.view.strictOn;
 
                 /* test code */
                 /*
-                this.seqCount = 19;
-                this.seqNum = 18;
-                console.log(this.sequence);
-                */
+                 this.seqCount = 19;
+                 this.seqNum = 18;
+                 console.log(this.sequence);
+                 */
             },
-            _onUpdate:       function (dt) {
+            _onUpdate:        function (dt) {
                 this._processEvents(dt);
 
                 // execute state
@@ -218,12 +219,12 @@ angular.module('myApp.view1', ['ngRoute'])
                 // tell view to update
                 this.callback();
             },
-            _addEvent:       function (delay, scope, func, prams) {
+            _addEvent:        function (delay, scope, func, prams) {
                 var id = this.events.length;
                 this.events.push({id: id, scope: scope, delay: delay, func: func, prams: prams});
                 return id;
             },
-            _removeEvent:    function (id) {
+            _removeEvent:     function (id) {
                 this.events.some(function (element, index) {
                     if (element.id === id) {
                         this.events[index] = undefined;
@@ -234,7 +235,7 @@ angular.module('myApp.view1', ['ngRoute'])
             _removeAllEvents: function () {
                 this.events = [];
             },
-            _processEvents:  function (dt) {
+            _processEvents:   function (dt) {
                 var marker = 'marker';
                 this.events.push(marker);
 
@@ -251,7 +252,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     }
                 } while (shifted !== marker);
             },
-            _cleanup:        function () {
+            _cleanup:         function () {
                 // clear all events
                 this._removeAllEvents();
 
@@ -281,11 +282,15 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.state = newState;
             },
             btnInput:          function (color) {
+                //console.log(this.state);
                 if (this.state !== this.states.run) {
                     return;
                 }
                 var btn;
                 var btnNum;
+                var delay = 0;
+                var parent = this;
+
                 if (color === 'green') {
                     btn    = 'btnGreen';
                     btnNum = 1;
@@ -301,11 +306,10 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
 
                 // play sound and light button
-                this.animation.play(this, this.animation.buttonFlash, this.states.updating, btn);
+                delay = this.animation.play(this, this.animation.buttonFlash, this.states.run, [btn, 0]);
 
                 // process input
                 // good input
-                var parent = this;
                 if (this.sequence[this.seqNum] === btnNum) {
                     this.seqNum++;
 
@@ -321,13 +325,13 @@ angular.module('myApp.view1', ['ngRoute'])
                         this._removeEvent(this.failTimerID);
 
                         // play win animation
-                        this.animation.play(this, this.animation.win, this.states.ready);
+                        this._addEvent(delay, this, this.animation.play(this, this.animation.win, this.states.ready));
                         return;
                     }
 
                     //
                     if (this.seqNum > this.seqCount) {
-                        console.log('this.seqNum > this.seqCount');
+                        //console.log('this.seqNum > this.seqCount');
                         this.seqNum = 0;
                         this.seqCount++;
 
@@ -335,7 +339,7 @@ angular.module('myApp.view1', ['ngRoute'])
                         this._removeEvent(this.failTimerID);
 
                         // play sequence
-                        var delay = this._playSequence();
+                        delay += this._playSequence(parent.states.run);
 
                         // set state to run
                         this._addEvent(delay, this, this._setState, parent.states.run);
@@ -343,11 +347,15 @@ angular.module('myApp.view1', ['ngRoute'])
                         // add event to time out if they take too long to input buttons
                         // keep event id so we can cancel it
                         this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
+                        return;
                     }
                 } else {
                     // bad input - set state to failed
                     this._addEvent(0, this, this._setState, parent.states.failed);
+                    return;
                 }
+                this._addEvent(delay, this, this._setState, parent.states.run);
+
             },
             _generateSequence: function () {
                 this.sequence = [];
@@ -357,30 +365,20 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             },
             // todo turn playSequence into an animation
-            _playSequence:     function () {
+            _playSequence:     function (nextState) {
                 console.log('_playSequence');
 
                 var delay = this.timeDelay;
                 // set state to playing to prevent user actions other than on/off
                 var parent = this;
-                this._addEvent(0, this, this._setState, parent.states.animating);
+                //this._addEvent(0, this, this._setState, parent.states.animating);
 
                 for (var i = 0; i < this.seqCount + 1; i++) {
-                    // button on
-                    this._addEvent(delay , this, this._btnOn, this._getBtn(this.sequence[i]));
-                    // button off
-                    this._addEvent(delay + this.btnFlashTime, this, this._btnOff, this._getBtn(this.sequence[i]));
+                    this.animation.play(this, parent.animation.buttonFlash, parent.states.animating, [this._getBtn(this.sequence[i]), delay]);
                     delay += this.timeDelay - this.difficulty;
                 }
+                this._addEvent(delay, this, this._setState, nextState);
                 return delay;
-            },
-            _btnOn:            function (btn) {
-                this.view[btn]      = true;
-                this.view.sndToPlay = this.sounds[btn + 'Snd'];
-            },
-            _btnOff:           function (btn) {
-                this.view[btn]      = false;
-                this.view.sndToPlay = undefined;
             },
             _getBtn:           function (nbr) {
                 switch (nbr) {
@@ -394,19 +392,19 @@ angular.module('myApp.view1', ['ngRoute'])
                         return 'btnYellow';
                 }
             },
-            getSoundToPlay:  function () {
+            getSoundToPlay:    function () {
                 var result          = this.view.sndToPlay;
                 this.view.sndToPlay = undefined;
                 return result;
             },
-            _setCounter: function (value){
+            _setCounter:       function (value) {
                 value = value.toString().split('');
-                if (value.length === 1){
+                if (value.length === 1) {
                     value.unshift('0');
                 }
                 this.view.counter = value.join(' ');
             },
-            view:            {
+            view:              {
                 btnGreen:  false,
                 btnRed:    false,
                 btnBlue:   false,
@@ -417,29 +415,29 @@ angular.module('myApp.view1', ['ngRoute'])
                 strictOn:  false,
                 gameOn:    false
             },
-            sounds:          {
+            sounds:            {
                 btnGreenSnd:  'assets/sounds/simonSound1.mp3',
                 btnRedSnd:    'assets/sounds/simonSound2.mp3',
                 btnBlueSnd:   'assets/sounds/simonSound3.mp3',
                 btnYellowSnd: 'assets/sounds/simonSound4.mp3',
             },
-            events:          [],
-            state:           undefined,
-            sequence:        [],
-            seqCount:        0,                 // end of the current rnd
-            seqNum:          0,                 // how many correct buttons player has pushed
-            timeDelay:       900,              // millisecond time delay between buttons
-            btnFlashTime:    400,               // millisecond how long to leave a button on.
-            inputTimeOut:    8000,              // time player has to input the correct sequence
-            autoRestartTime: 2000,              // millisecond how long to wait before restart
-            flashTime:       300,
-            level_1:         5,
-            level_2:         9,
-            level_3:         13,
-            difficulty:      0,
-            diffInc:         200,
-            failTimerID:     undefined,
-            heartBeat:       undefined
+            events:            [],
+            state:             undefined,
+            sequence:          [],
+            seqCount:          0,                 // end of the current rnd
+            seqNum:            0,                 // how many correct buttons player has pushed
+            timeDelay:         900,              // millisecond time delay between buttons
+            btnFlashTime:      400,               // millisecond how long to leave a button on.
+            inputTimeOut:      8000,              // time player has to input the correct sequence
+            autoRestartTime:   2000,              // millisecond how long to wait before restart
+            flashTime:         300,
+            level_1:           5,
+            level_2:           9,
+            level_3:           13,
+            difficulty:        0,
+            diffInc:           200,
+            failTimerID:       undefined,
+            heartBeat:         undefined
         };
         /* end of simon */
 
