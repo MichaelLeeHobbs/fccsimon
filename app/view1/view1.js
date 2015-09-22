@@ -24,7 +24,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     this.view.counterOn = true;
                     // next state
                     this._addEvent(0, this, this._setState, this.states.ready);
-                    console.log('state on ran');
+
                 },
                 off:       function () {
                     /* state: off */
@@ -35,7 +35,6 @@ angular.module('myApp.view1', ['ngRoute'])
 
                     // clean up
                     this._cleanup();
-
                     // set state to undefined - this is our initial state
                     this._addEvent(0, this, this._setState, undefined);
                     // stop heartbeat 100ms latter - this gives update time to process any clean up events
@@ -63,14 +62,12 @@ angular.module('myApp.view1', ['ngRoute'])
 
                     // clean up
                     this._cleanup();
-
                     // generate a sequence
                     this._generateSequence();
 
                     // set start to restart - this was done to avoid code duplication as
                     // restart already dose what needed to be done to start
-                    var parent       = this;
-                    this._addEvent(0, this, this._setState, parent.states.restart);
+                    this._addEvent(0, this, this._setState, this.states.restart);
                 },
                 restart:   function () {
                     /* state: restart */
@@ -79,12 +76,10 @@ angular.module('myApp.view1', ['ngRoute'])
                     // play sequence
                     // prams[timeDelay, sequence, stop, modifier]
                     var prams = [this.timeDelay, this.sequence, this.seqCount + 1, this.difficulty];
-                    console.log('82');
                     var delay = this.animation.play(this, this.animation.playSequence, this.states.run, prams);
 
                     // add event to time out if they take too long to input buttons
                     // keep event id so we can cancel it
-                    console.log('delay: ' + delay);
                     this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, this.states.failed);
                 },
                 failed:    function () {
@@ -96,9 +91,8 @@ angular.module('myApp.view1', ['ngRoute'])
                         this.failTimerID = undefined;
                     }
 
-                    console.log('failed');
-                    // player failed for some reason, we don't care why
 
+                    // player failed for some reason, we don't care why
                     var nextState = this.states.restart;
                     // if strict that's it game over / restart
                     if (this.view.strictOn) {
@@ -110,14 +104,14 @@ angular.module('myApp.view1', ['ngRoute'])
                 }
             }, /* end of states */
             animation:        {
-                play:        function (scope, animation, nextState, prams) {
+                play:         function (scope, animation, nextState, prams) {
                     scope._addEvent(0, scope, scope._setState, scope.states.animating);
                     var animationTime = animation(scope, prams);
-                    console.log('play: nextState: ' + nextState);
+
                     scope._addEvent(animationTime, scope, scope._setState, nextState);
                     return animationTime;
                 },
-                error:       function (scope) {
+                error:        function (scope) {
                     var flashTime = 300;
                     var time      = 0;
 
@@ -133,10 +127,9 @@ angular.module('myApp.view1', ['ngRoute'])
                     }
                     return time;
                 },
-                win:         function (scope) {
+                win:          function (scope) {
                     var spinTime = 50;
                     var time     = 0;
-
                     var spin = ['| |', '/ /', '- -', '\\ \\'];
 
                     var flashFunc = function (num) {
@@ -151,7 +144,7 @@ angular.module('myApp.view1', ['ngRoute'])
                     }
                     return time;
                 },
-                buttonFlash: function (scope, prams) {
+                buttonFlash:  function (scope, prams) {
                     var btn    = prams[0];
                     var time   = prams[1];
                     var btnOn  = function (btn) {
@@ -171,9 +164,9 @@ angular.module('myApp.view1', ['ngRoute'])
                 playSequence: function (scope, prams) {
                     var delay = prams[0];       // timeDelay;
                     var timeDelay = prams[0];
-                    var sequence = prams[1];
-                    var stop = prams[2];
-                    var modifier = prams[3];
+                    var sequence  = prams[1];
+                    var stop      = prams[2];
+                    var modifier  = prams[3];
                     // prams[2] = scope.seqCount + 1
                     for (var i = 0; i < stop; i++) {
                         scope.animation.play(scope, scope.animation.buttonFlash, scope.states.animating, [scope._getBtn(sequence[i]), delay]);
@@ -218,13 +211,6 @@ angular.module('myApp.view1', ['ngRoute'])
             },
             toggleStrict:     function () {
                 this.view.strictOn = !this.view.strictOn;
-
-                /* test code */
-                /*
-                 this.seqCount = 19;
-                 this.seqNum = 18;
-                 console.log(this.sequence);
-                 */
             },
             _onUpdate:        function (dt) {
                 this._processEvents(dt);
@@ -237,7 +223,6 @@ angular.module('myApp.view1', ['ngRoute'])
                 this.callback();
             },
             _addEvent:        function (delay, scope, func, prams) {
-                console.log('addEvent: delay: ' + delay + ' prams: ' + prams);
                 var id = this.events.length;
                 this.events.push({id: id, scope: scope, delay: delay, func: func, prams: prams});
                 return id;
@@ -290,23 +275,20 @@ angular.module('myApp.view1', ['ngRoute'])
                 if (!this.view.gameOn) {
                     return;
                 }
-                console.log('starting');
-
                 // set state to start
-                var parent = this;
-                this._addEvent(0, this, this._setState, parent.states.start);
+                this._addEvent(0, this, this._setState, this.states.start);
             },
             _setState:         function (newState) {
                 this.state = newState;
             },
             btnInput:          function (color) {
-                //console.log(this.state);
+                //
                 if (this.state !== this.states.run) {
                     return;
                 }
                 var btn;
                 var btnNum;
-                var delay = 0;
+                var delay  = 0;
                 var parent = this;
 
                 if (color === 'green') {
@@ -349,7 +331,7 @@ angular.module('myApp.view1', ['ngRoute'])
 
                     //
                     if (this.seqNum > this.seqCount) {
-                        //console.log('this.seqNum > this.seqCount');
+                        //
                         this.seqNum = 0;
                         this.seqCount++;
 
@@ -359,7 +341,7 @@ angular.module('myApp.view1', ['ngRoute'])
                         // play sequence
                         // prams[timeDelay, sequence, stop, modifier]
                         var prams = [this.timeDelay, this.sequence, this.seqCount + 1, this.difficulty];
-                        console.log('361');
+
                         delay += this.animation.play(this, this.animation.playSequence, this.states.updating, prams);
 
                         // set state to run
@@ -367,7 +349,7 @@ angular.module('myApp.view1', ['ngRoute'])
 
                         // add event to time out if they take too long to input buttons
                         // keep event id so we can cancel it
-                        console.log('delay: ' + delay);
+
                         this.failTimerID = this._addEvent(delay + this.inputTimeOut, this, this._setState, parent.states.failed);
                         return;
                     }
